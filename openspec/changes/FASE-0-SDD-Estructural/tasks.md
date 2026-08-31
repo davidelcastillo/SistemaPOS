@@ -47,8 +47,8 @@ Chain strategy: pending
 
 ## Phase 3: Data Contract (TDD)
 
-- [ ] 3.1 **RED** Tests unitarios de validaciones: `loginSchema` (email válido/inválido, password min 1), `pagination` defaults, enums `payment`, `ids.cuidSchema`, `ActionResult<T>` discriminado (ok/error, `ErrorCode`). Aceptación: tests fallan (schemas ausentes). Commit: `test(validations): spec shared Zod contract borders`
-- [ ] 3.2 **GREEN** `src/lib/validations/{result,auth,pagination,payment,ids}.ts`: `ActionResult<T>` + `ErrorCode` tipado; `loginSchema` con "Credenciales inválidas"; tipos `z.infer` exportados (R-2/R-3). Compartido → solo con coordinación. Aceptación: tests 3.1 verdes; tsc verde. Commit: `feat(validations): add shared Zod contract with ActionResult`
+- [x] 3.1 **RED** Tests unitarios de validaciones: `loginSchema` (email válido/inválido, password min 1), `pagination` defaults, enums `payment`, `ids.cuidSchema`, `ActionResult<T>` discriminado (ok/error, `ErrorCode`). Aceptación: tests fallan (schemas ausentes). Commit: `test(validations): spec shared Zod contract borders`
+- [x] 3.2 **GREEN** `src/lib/validations/{result,auth,pagination,payment,ids}.ts`: `ActionResult<T>` + `ErrorCode` tipado; `loginSchema` con "Credenciales inválidas"; tipos `z.infer` exportados (R-2/R-3). Compartido → solo con coordinación. Aceptación: tests 3.1 verdes; tsc verde. Commit: `feat(validations): add shared Zod contract with ActionResult`
 
 ## Phase 4: Data Model
 
