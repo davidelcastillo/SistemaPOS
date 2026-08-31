@@ -22,7 +22,7 @@ Greenfield: se materializan las 5 specs como base arquitectónica sin lógica de
 
 ## Directory Structure (resultado)
 
-```
+```text
 src/
 ├── app/
 │   ├── (auth)/login/page.tsx              # placeholder (UI en Auth)
@@ -356,7 +356,7 @@ export const createProductSchema = z.object({
 
 ## Data Flow
 
-```
+```text
 Browser ──RSC──▶ page.tsx ──getServerSession(authOptions)──▶ redirect(/dashboard | /login)
 Browser ──▶ Server Action ──▶ Zod (ActionResult) ──▶ $transaction(prisma) ──▶ PostgreSQL ──▶ revalidatePath
 Browser ──SWR──▶ GET /api/<modulo> ──▶ prisma query (is_active) ──▶ JSON ──▶ SWR cache

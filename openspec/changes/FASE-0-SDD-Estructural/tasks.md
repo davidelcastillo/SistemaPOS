@@ -27,9 +27,9 @@ Chain strategy: pending
 
 ## Phase 1: Base Config & Tooling
 
-- [ ] 1.1 **[RED]** `e2e/smoke.spec.ts`: scenario A (sin sesión → `/login`) activo; scenario B (admin → `/dashboard`) con `test.skip` + TODO Auth. Aceptación: `npx playwright test e2e/smoke.spec.ts` corre y A falla (page.tsx aún boilerplate). Commit: `test(e2e): add smoke redirect spec (auth scenario skipped)`
+- [ ] 1.1 **RED** `e2e/smoke.spec.ts`: scenario A (sin sesión → `/login`) activo; scenario B (admin → `/dashboard`) con `test.skip` + TODO Auth. Aceptación: `npx playwright test e2e/smoke.spec.ts` corre y A falla (page.tsx aún boilerplate). Commit: `test(e2e): add smoke redirect spec (auth scenario skipped)`
 - [ ] 1.2 `playwright.config.ts`: `webServer {command:"npm run dev", url: http://localhost:3000, reuseExistingServer: !CI}`, `baseURL`, proyecto chromium, `testDir: "./e2e"`. Aceptación: `npx playwright test` levanta dev server y reporta. Commit: `chore(e2e): configure playwright with dev webServer`
-- [ ] 1.3 **[GREEN]** Instalar `@vitest/coverage-v8` (devDep) + `vitest.config.mts`: coverage v8, include `src/lib/** src/actions/** src/middleware.ts src/app/**`, exclude `src/generated/** src/test/** **/*.test.* src/components/__tests__/**`, thresholds 80 (statements/branches/functions/lines), coverage activo en `npm test` (`coverage.enabled: true` o script `vitest run --coverage`). Archivos calientes (`package.json`) con acuerdo. Aceptación: `npm test` genera reporte; umbral evaluado en 5.2. Commit: `build(vitest): add v8 coverage with 80% DoD thresholds`
+- [ ] 1.3 **GREEN** Instalar `@vitest/coverage-v8` (devDep) + `vitest.config.mts`: coverage v8, include `src/lib/** src/actions/** src/middleware.ts src/app/**`, exclude `src/generated/** src/test/** **/*.test.* src/components/__tests__/**`, thresholds 80 (statements/branches/functions/lines), coverage activo en `npm test` (`coverage.enabled: true` o script `vitest run --coverage`). Archivos calientes (`package.json`) con acuerdo. Aceptación: `npm test` genera reporte; umbral evaluado en 5.2. Commit: `build(vitest): add v8 coverage with 80% DoD thresholds`
 - [ ] 1.4 Fix lint `docs/` (×3): `docs/AGENTS.md` H1 duplicado→`##` (l.11) + fence→` ```text ` (l.147); `docs/HU-proyectoPOS.md` `#`→`##` (l.1). Aceptación: `npm run lint` verde sin ignorar `docs/`. Commit: `docs(lint): fix markdown errors in docs/`
 - [ ] 1.5 Fix lint `openspec/.../exploration.md`: fence→` ```text ` (l.59). Aceptación: `npm run lint` verde. Commit: `docs(lint): tag exploration code fence with text`
 - [ ] 1.6 `docs/AGENTS.md` stale: sincronizar con AGENTS.md raíz (proyecto-pos: `DATABASE_URL`/`NEXTAUTH_URL`/`NEXTAUTH_SECRET`/`NEXT_PUBLIC_APP_ENV`, `prisma.config.ts`, NextAuth v4, bcrypt 10 rounds; eliminar `ssr-sistema-tickets`, `AUTH_URL`/`AUTH_SECRET`/`APP_ENV`, `prisma7.config.ts`, Socket.io). Aceptación: grep sin `ssr-sistema-tickets|AUTH_URL|AUTH_SECRET|APP_ENV` en el archivo; lint verde. Commit: `docs(agents): refresh docs/AGENTS.md to proyecto-pos stack`
@@ -37,7 +37,7 @@ Chain strategy: pending
 ## Phase 2: Project Structure
 
 - [ ] 2.1 `src/app/layout.tsx` (hot): metadata POS — título "Sistema POS", `lang="es"` (R-5). Aceptación: `tsc --noEmit` + lint verdes. Commit: `feat(app): set POS metadata and es locale in root layout`
-- [ ] 2.2 **[GREEN del smoke]** `src/app/page.tsx` (hot): reemplazar boilerplate por `getServerSession(authOptions)` → redirect `/dashboard` \| `/login`. Aceptación: scenario A del smoke verde. Commit: `feat(app): redirect root by session state`
+- [ ] 2.2 **GREEN del smoke** `src/app/page.tsx` (hot): reemplazar boilerplate por `getServerSession(authOptions)` → redirect `/dashboard` \| `/login`. Aceptación: scenario A del smoke verde. Commit: `feat(app): redirect root by session state`
 - [ ] 2.3 Placeholders RSC: `src/app/(auth)/login/page.tsx` + `src/app/(routes)/{ventas,compras,inventario,inactivos,descuentos,dashboard}/page.tsx` (R-1/R-2). Aceptación: rutas responden 200 en dev server; lint/tsc verdes. Commit: `feat(app): scaffold module route groups with placeholders`
 - [ ] 2.4 `src/lib/auth.ts` (hot, shell): `authOptions` con Credentials Provider (`authorize`→null) y callbacks JWT `id`+`role`; sin validación de credenciales (HU-1.1). Aceptación: exporta `authOptions`; tsc verde. Commit: `feat(auth): add structural authOptions shell`
 - [ ] 2.5 `src/middleware.ts` (hot, shell): `matcher` + matriz de roles documentada (público `/login`+`/api/auth`; cashier `/ventas`,`/inventario`,`/compras` GET; admin todo + `/inactivos`,`/descuentos`,`/dashboard`); validación real en HU-1.2. Aceptación: tsc+lint verdes; matriz en comentario. Commit: `feat(auth): scaffold role matrix middleware shell`
@@ -47,8 +47,8 @@ Chain strategy: pending
 
 ## Phase 3: Data Contract (TDD)
 
-- [ ] 3.1 **[RED]** Tests unitarios de validaciones: `loginSchema` (email válido/inválido, password min 1), `pagination` defaults, enums `payment`, `ids.cuidSchema`, `ActionResult<T>` discriminado (ok/error, `ErrorCode`). Aceptación: tests fallan (schemas ausentes). Commit: `test(validations): spec shared Zod contract borders`
-- [ ] 3.2 **[GREEN]** `src/lib/validations/{result,auth,pagination,payment,ids}.ts`: `ActionResult<T>` + `ErrorCode` tipado; `loginSchema` con "Credenciales inválidas"; tipos `z.infer` exportados (R-2/R-3). Compartido → solo con coordinación. Aceptación: tests 3.1 verdes; tsc verde. Commit: `feat(validations): add shared Zod contract with ActionResult`
+- [ ] 3.1 **RED** Tests unitarios de validaciones: `loginSchema` (email válido/inválido, password min 1), `pagination` defaults, enums `payment`, `ids.cuidSchema`, `ActionResult<T>` discriminado (ok/error, `ErrorCode`). Aceptación: tests fallan (schemas ausentes). Commit: `test(validations): spec shared Zod contract borders`
+- [ ] 3.2 **GREEN** `src/lib/validations/{result,auth,pagination,payment,ids}.ts`: `ActionResult<T>` + `ErrorCode` tipado; `loginSchema` con "Credenciales inválidas"; tipos `z.infer` exportados (R-2/R-3). Compartido → solo con coordinación. Aceptación: tests 3.1 verdes; tsc verde. Commit: `feat(validations): add shared Zod contract with ActionResult`
 
 ## Phase 4: Data Model
 

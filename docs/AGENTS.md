@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# AGENTS.md – Configuración del agente para el proyecto `ssr-sistema-tickets`
+## AGENTS.md – Configuración del agente para el proyecto `ssr-sistema-tickets`
 
 Este archivo es la configuración central que consulta el agente antes de ejecutar cualquier tarea. Incluye la metodología de desarrollo modular asistida por IA, las skills disponibles, la configuración de entornos, las reglas de trabajo y los enlaces a la documentación de las tecnologías usadas.
 
@@ -144,7 +144,7 @@ Una HU se considera completa SOLO cuando cumple todos los criterios:
 
 ### 7.1 Estructura por módulo
 
-```
+```text
 src/app/(routes)/<modulo>/      → páginas del módulo
 src/components/<modulo>/        → componentes del módulo
 src/actions/<modulo>.ts         → server actions del módulo

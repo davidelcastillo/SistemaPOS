@@ -56,7 +56,7 @@ Scaffold de Create Next App recién inicializado. Existe: `src/app/{page,layout}
 
 ### 1. Estructura de directorios recomendada (metodología + AGENTS.md)
 
-```
+```text
 src/
 ├── app/
 │   ├── (auth)/
