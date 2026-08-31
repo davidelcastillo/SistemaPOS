@@ -36,14 +36,14 @@ Chain strategy: pending
 
 ## Phase 2: Project Structure
 
-- [ ] 2.1 `src/app/layout.tsx` (hot): metadata POS — título "Sistema POS", `lang="es"` (R-5). Aceptación: `tsc --noEmit` + lint verdes. Commit: `feat(app): set POS metadata and es locale in root layout`
-- [ ] 2.2 **GREEN del smoke** `src/app/page.tsx` (hot): reemplazar boilerplate por `getServerSession(authOptions)` → redirect `/dashboard` \| `/login`. Aceptación: scenario A del smoke verde. Commit: `feat(app): redirect root by session state`
-- [ ] 2.3 Placeholders RSC: `src/app/(auth)/login/page.tsx` + `src/app/(routes)/{ventas,compras,inventario,inactivos,descuentos,dashboard}/page.tsx` (R-1/R-2). Aceptación: rutas responden 200 en dev server; lint/tsc verdes. Commit: `feat(app): scaffold module route groups with placeholders`
-- [ ] 2.4 `src/lib/auth.ts` (hot, shell): `authOptions` con Credentials Provider (`authorize`→null) y callbacks JWT `id`+`role`; sin validación de credenciales (HU-1.1). Aceptación: exporta `authOptions`; tsc verde. Commit: `feat(auth): add structural authOptions shell`
-- [ ] 2.5 `src/middleware.ts` (hot, shell): `matcher` + matriz de roles documentada (público `/login`+`/api/auth`; cashier `/ventas`,`/inventario`,`/compras` GET; admin todo + `/inactivos`,`/descuentos`,`/dashboard`); validación real en HU-1.2. Aceptación: tsc+lint verdes; matriz en comentario. Commit: `feat(auth): scaffold role matrix middleware shell`
-- [ ] 2.6 `src/actions/{auth,inventario,ventas,compras,descuentos,dashboard}.ts`: shells comment-only (mapa de propiedad §7.2; sin lógica de negocio). Aceptación: compilan; sin implementación. Commit: `feat(actions): scaffold per-module server action shells`
-- [ ] 2.7 `.gitkeep` en `src/components/{ui,ventas,compras,inventario,descuentos,dashboard}/` y `src/lib/{inventario,ventas,compras,descuentos,dashboard}/`. Aceptación: estructura de directorios presente (R-1). Commit: `chore(src): scaffold module directories with gitkeep`
-- [ ] 2.8 `docs/mapa-exposicion.md`: tabla definitiva del Mapa de Exposición (SA vs GET por módulo, ubicación, herramienta de prueba; cashier `/compras` solo lectura; `createPurchase` valida admin server-side). Aceptación: refleja el Module Exposure Map del design. Commit: `docs(exposure): add module exposure map reference`
+- [x] 2.1 `src/app/layout.tsx` (hot): metadata POS — título "Sistema POS", `lang="es"` (R-5). Aceptación: `tsc --noEmit` + lint verdes. Commit: `feat(app): set POS metadata and es locale in root layout`
+- [x] 2.2 **GREEN del smoke** `src/app/page.tsx` (hot): reemplazar boilerplate por `getServerSession(authOptions)` → redirect `/dashboard` \| `/login`. Aceptación: scenario A del smoke verde. Commit: `feat(app): redirect root by session state`
+- [x] 2.3 Placeholders RSC: `src/app/(auth)/login/page.tsx` + `src/app/(routes)/{ventas,compras,inventario,inactivos,descuentos,dashboard}/page.tsx` (R-1/R-2). Aceptación: rutas responden 200 en dev server; lint/tsc verdes. Commit: `feat(app): scaffold module route groups with placeholders`
+- [x] 2.4 `src/lib/auth.ts` (hot, shell): `authOptions` con Credentials Provider (`authorize`→null) y callbacks JWT `id`+`role`; sin validación de credenciales (HU-1.1). Aceptación: exporta `authOptions`; tsc verde. Commit: `feat(auth): add structural authOptions shell`
+- [x] 2.5 `src/middleware.ts` (hot, shell): `matcher` + matriz de roles documentada (público `/login`+`/api/auth`; cashier `/ventas`,`/inventario`,`/compras` GET; admin todo + `/inactivos`,`/descuentos`,`/dashboard`); validación real en HU-1.2. Aceptación: tsc+lint verdes; matriz en comentario. Commit: `feat(auth): scaffold role matrix middleware shell`
+- [x] 2.6 `src/actions/{auth,inventario,ventas,compras,descuentos,dashboard}.ts`: shells comment-only (mapa de propiedad §7.2; sin lógica de negocio). Aceptación: compilan; sin implementación. Commit: `feat(actions): scaffold per-module server action shells`
+- [x] 2.7 `.gitkeep` en `src/components/{ui,ventas,compras,inventario,descuentos,dashboard}/` y `src/lib/{inventario,ventas,compras,descuentos,dashboard}/`. Aceptación: estructura de directorios presente (R-1). Commit: `chore(src): scaffold module directories with gitkeep`
+- [x] 2.8 `docs/mapa-exposicion.md`: tabla definitiva del Mapa de Exposición (SA vs GET por módulo, ubicación, herramienta de prueba; cashier `/compras` solo lectura; `createPurchase` valida admin server-side). Aceptación: refleja el Module Exposure Map del design. Commit: `docs(exposure): add module exposure map reference`
 
 ## Phase 3: Data Contract (TDD)
 
