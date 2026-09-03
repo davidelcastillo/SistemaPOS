@@ -52,11 +52,11 @@ Chain strategy: pending
 
 ## Phase 4: Data Model
 
-- [ ] 4.1 `prisma/schema.prisma` (dueño único BD): 16 modelos + 5 enums del design (User…DiscountVariant; `Role`, `CashRegisterStatus`, `PaymentMethod`, `PurchasePaymentMethod`, `DiscountType`); sin `Sucursal` ni `branch_user` (R-3); `Provider` sin CRUD (R-4); invariantes SKU/stock/`is_active` (R-5). Aceptación: `npx prisma validate` verde. Commit: `feat(prisma): add full domain schema (16 models, 5 enums)`
-- [ ] 4.2 `npm run db:generate` verifica el cliente Prisma; NO ejecutar `prisma migrate dev` (migración inicial en design de Auth, R-6). Aceptación: generate exitoso; sin migraciones nuevas. Commit: `chore(prisma): verify client generation without migrating`
+- [x] 4.1 `prisma/schema.prisma` (dueño único BD): 16 modelos + 5 enums del design (User…DiscountVariant; `Role`, `CashRegisterStatus`, `PaymentMethod`, `PurchasePaymentMethod`, `DiscountType`); sin `Sucursal` ni `branch_user` (R-3); `Provider` sin CRUD (R-4); invariantes SKU/stock/`is_active` (R-5). Aceptación: `npx prisma validate` verde. Commit: `feat(prisma): add full domain schema (16 models, 5 enums)`
+- [x] 4.2 `npm run db:generate` verifica el cliente Prisma; NO ejecutar `prisma migrate dev` (migración inicial en design de Auth, R-6). Aceptación: generate exitoso; sin migraciones nuevas. Commit: `chore(prisma): verify client generation without migrating`
 
 ## Phase 5: Verification
 
-- [ ] 5.1 Gate completo: `npm test`, `tsc --noEmit`, `npm run lint`, `npx playwright test` (smoke A verde, B skip). Aceptación: los 4 comandos verdes. Commit: `test(phase0): green full verification gates`
-- [ ] 5.2 Cobertura: con reporte generado, si <80% documentar plan de transición (umbral configurado como gate DoD por módulo desde Auth; Fase 0 = reporte + plan en `docs/mapa-exposicion.md` o nota SDD). Aceptación: reporte generado y plan documentado, o ≥80% directo. Commit: `docs(testing): record progressive coverage plan`
-- [ ] 5.3 Verificar convención (R-1/R-4): mapa de archivos = mapa de requerimientos, `docs/` sin ignorar en lint, shells calientes solo con acuerdo. Aceptación: checklist DoD de Fase 0 completo. Commit: fold en 5.1/5.2
+- [x] 5.1 Gate completo: `npm test`, `tsc --noEmit`, `npm run lint`, `npx playwright test` (smoke A verde, B skip). Aceptación: los 4 comandos verdes. Commit: `test(phase0): green full verification gates`
+- [x] 5.2 Cobertura: con reporte generado, si <80% documentar plan de transición (umbral configurado como gate DoD por módulo desde Auth; Fase 0 = reporte + plan en `docs/mapa-exposicion.md` o nota SDD). Aceptación: reporte generado y plan documentado, o ≥80% directo. Commit: `docs(testing): record progressive coverage plan`
+- [x] 5.3 Verificar convención (R-1/R-4): mapa de archivos = mapa de requerimientos, `docs/` sin ignorar en lint, shells calientes solo con acuerdo. Aceptación: checklist DoD de Fase 0 completo. Commit: fold en 5.1/5.2
