@@ -8,7 +8,21 @@ import markdown from "@eslint/markdown";
 import css from "@eslint/css";
 
 export default defineConfig([
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".agents/**", "src/generated/**", "package-lock.json"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".agents/**",
+    "src/generated/**",
+    "package-lock.json",
+    // Generated artifacts: coverage report, Playwright output, and the root
+    // AGENTS.md nextjs-agent-rules block (auto-written by `next dev`).
+    "coverage/**",
+    "test-results/**",
+    "playwright-report/**",
+    "AGENTS.md",
+  ]),
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     plugins: { js },
