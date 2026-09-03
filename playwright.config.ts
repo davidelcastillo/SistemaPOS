@@ -20,7 +20,9 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // First Turbopack compile on this machine is slow (network drive);
+    // allow up to 5 minutes for the dev server to become ready.
+    timeout: 300_000,
   },
   projects: [
     {
