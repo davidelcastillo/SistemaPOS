@@ -21,6 +21,7 @@ Este archivo es la configuración central que consulta el agente antes de ejecut
 | turborepo | Monorepo build system with intelligent task caching | `.agents/skills/turborepo/` |
 | webapp-testing | Native Python Playwright scripts for testing local web applications | `.agents/skills/webapp-testing/` |
 | context7-mcp | Current library/framework docs via Context7 | `~/.agents/skills/context7-mcp/` |
+| STYLES | Style guide for this project |.STYLES.md|
 
 Actualizar esta tabla cuando cambie el registro de skills. Antes de cada delegación, resolver los skills relevantes por nombre de registro:
 
@@ -67,7 +68,7 @@ Establecer las bases arquitectónicas ANTES de programar la primera HU:
 2. **Pruebas de Integración (Aislamiento):** antes de tocar la UI:
     - **Server Actions y lógica pura** (`src/lib/<modulo>/`): tests de integración con **Vitest contra PostgreSQL** (contenedor Docker). Sin URL ni JSON → Postman no aplica.
     - **Route Handlers REST:** API tests (supertest o equivalente). **Postman solo como smoke test exploratorio, nunca como gate** de calidad.
-3. **Capa de Presentación (Frontend):** con el contrato consolidado, SDD para diseño de UI importando tipos y schemas compartidos. La alineación frontend-backend la valida el compilador en build time.
+3. **Capa de Presentación (Frontend):** con el contrato consolidado, SDD para diseño de UI importando tipos y schemas compartidos. La alineación frontend-backend la valida el compilador en build time. Se debe aplicar en todos lados el estilo dictado por el archivo '.STYLES.md'
 4. **Pruebas End-to-End:** flujo completo desde el navegador con **Playwright**, verificando conexión frontend-backend, UX y manejo de errores.
 5. **Cierre e Iteración:** verificar el Definition of Done (3.3) y recién entonces seguir con la siguiente HU del mismo módulo.
 
@@ -165,12 +166,3 @@ src/lib/<modulo>/schemas.ts     → contrato de datos (Zod) del módulo
 
 ---
 
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
