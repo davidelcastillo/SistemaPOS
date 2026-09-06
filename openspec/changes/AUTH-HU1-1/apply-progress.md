@@ -20,33 +20,33 @@ Implementado el flujo backend completo de HU-1.1: fundación de datos (enum `Rol
 
 ## Fase 2: Contrato de datos
 
-- [x] 2.1 [RED] `validations.test.ts`: `DUPLICATE_EMAIL` como código válido (falla)
+- [x] 2.1 \[RED\] `validations.test.ts`: `DUPLICATE_EMAIL` como código válido (falla)
   - Evidencia: 1 test failed (16 tests, 1 fail).
-- [x] 2.2 [GREEN] `DUPLICATE_EMAIL` en `ErrorCode`/`ERROR_CODES` de `result.ts` (shared, coordinado)
+- [x] 2.2 \[GREEN\] `DUPLICATE_EMAIL` en `ErrorCode`/`ERROR_CODES` de `result.ts` (shared, coordinado)
   - Evidencia: 16/16 pass. Commit `feat(auth): add DUPLICATE_EMAIL to shared result contract` (PR2).
-- [x] 2.3 [RED] `schemas.test.ts`: registerSchema bordes (ok, email inválido, password <8, role inválido)
+- [x] 2.3 \[RED\] `schemas.test.ts`: registerSchema bordes (ok, email inválido, password <8, role inválido)
   - Evidencia: suite falla por import inexistente (RED).
-- [x] 2.4 [GREEN] `src/lib/auth/schemas.ts` (registerSchema + `RegisterInput`)
+- [x] 2.4 \[GREEN\] `src/lib/auth/schemas.ts` (registerSchema + `RegisterInput`)
   - Evidencia: 6/6 pass (agrega bordes name vacío y role ausente). Commit `feat(auth): add registerSchema contract...` (PR2).
 
 ## Fase 3: Núcleo auth
 
-- [x] 3.1 [RED] `authenticate.test.ts`: válido → `{id,role}`; password errónea → null; email inexistente → null
+- [x] 3.1 \[RED\] `authenticate.test.ts`: válido → `{id,role}`; password errónea → null; email inexistente → null
   - Evidencia: suite falla por import inexistente. Requirió `import "dotenv/config"` en `src/test/setup.ts` (DATABASE_URL no se cargaba en Vitest).
-- [x] 3.2 [GREEN] `src/lib/auth/authenticate.ts` (helper puro: loginSchema → findUnique → bcrypt.compare r10)
+- [x] 3.2 \[GREEN\] `src/lib/auth/authenticate.ts` (helper puro: loginSchema → findUnique → bcrypt.compare r10)
   - Evidencia: 5/5 integración contra PostgreSQL. Commit `feat(auth): add pure authenticate helper...` (PR3).
-- [x] 3.3 [RED] Integración `authenticate` contra PostgreSQL (R-2/R-3): login ok con role; inválido → null; payload inválido sin consultar BD
+- [x] 3.3 \[RED\] Integración `authenticate` contra PostgreSQL (R-2/R-3): login ok con role; inválido → null; payload inválido sin consultar BD
   - Evidencia: casos cubiertos en la misma suite: ok admin, ok cashier, password errónea, email inexistente, payload inválido (5/5). Fixtures aislados por dominio `@auth.test` para evitar carreras entre workers.
-- [x] 3.4 [GREEN] `src/lib/auth.ts`: authorize = Zod → authenticate → `{id,email,role}`; callbacks jwt/session tipados (R4 `token.role`)
+- [x] 3.4 \[GREEN\] `src/lib/auth.ts`: authorize = Zod → authenticate → `{id,email,role}`; callbacks jwt/session tipados (R4 `token.role`)
   - Evidencia: commit `feat(auth): wire credentials authorize into authOptions`. Unit `src/lib/auth.test.ts`: provider registrado, authorize inválido → null, token/session transportan id+role (R-1/R-3). tsc 0 errores.
 - [x] 3.5 Crear `src/app/api/auth/[...nextauth]/route.ts` (GET/POST = `NextAuth(authOptions)`); smoke `/api/auth/session` → 200
   - Evidencia: commit `feat(auth): mount NextAuth route handler`. Harness `npm run dev` → `GET /api/auth/session` → **200** `{}`.
 
 ## Fase 4: Server Action registerUser
 
-- [x] 4.1 [RED] `src/actions/auth.test.ts` (integración): admin ok; cashier → FORBIDDEN; sin sesión → UNAUTHORIZED; email dup → DUPLICATE_EMAIL; Zod → VALIDATION_ERROR
+- [x] 4.1 \[RED\] `src/actions/auth.test.ts` (integración): admin ok; cashier → FORBIDDEN; sin sesión → UNAUTHORIZED; email dup → DUPLICATE_EMAIL; Zod → VALIDATION_ERROR
   - Evidencia: 5 failed (registerUser inexistente en shell). `getServerSession` mockeado por escenario; fixtures `@reg.test`.
-- [x] 4.2 [GREEN] `registerUser` en `src/actions/auth.ts` ("use server"; getServerSession rol admin; bcrypt.hash r10; P2002 → DUPLICATE_EMAIL; `ActionResult<{id,email,role}>`)
+- [x] 4.2 \[GREEN\] `registerUser` en `src/actions/auth.ts` ("use server"; getServerSession rol admin; bcrypt.hash r10; P2002 → DUPLICATE_EMAIL; `ActionResult<{id,email,role}>`)
   - Evidencia: 5/5 pass. Password verificada con bcrypt.compare contra el hash almacenado. Commit `feat(auth): add admin-only registerUser server action` (PR3).
 
 ## Fase 5: Proxy y entorno
