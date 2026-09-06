@@ -50,7 +50,7 @@ describe("registerSchema (data contract: auth module)", () => {
   });
 
   it("rejects a payload missing the role field", () => {
-    const { role: _role, ...withoutRole } = validPayload;
+    const withoutRole = { name: validPayload.name, email: validPayload.email, password: validPayload.password };
     const parsed = registerSchema.safeParse(withoutRole);
     expect(parsed.success).toBe(false);
   });
