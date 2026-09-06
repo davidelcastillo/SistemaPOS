@@ -15,13 +15,13 @@ vi.mock("next-auth", () => ({
   getServerSession: () => mockSession,
 }));
 
-const TEST_ADMIN_EMAIL = "test-reg-admin@pos.test";
-const TEST_NEW_EMAIL = "test-reg-new@pos.test";
+const TEST_ADMIN_EMAIL = "test-reg-admin@reg.test";
+const TEST_NEW_EMAIL = "test-reg-new@reg.test";
 const TEST_PASSWORD = "secreto123";
 
 async function cleanupTestUsers() {
   await prisma.user.deleteMany({
-    where: { email: { contains: "@pos.test" } },
+    where: { email: { contains: "@reg.test" } },
   });
 }
 
@@ -67,7 +67,7 @@ describe("registerUser (integration — PostgreSQL)", () => {
 
     const result = await registerUser({
       name: "Intruso",
-      email: "test-reg-forbidden@pos.test",
+      email: "test-reg-forbidden@reg.test",
       password: TEST_PASSWORD,
       role: "admin",
     });
@@ -77,7 +77,7 @@ describe("registerUser (integration — PostgreSQL)", () => {
       expect(result.error.code).toBe("FORBIDDEN");
     }
     const stored = await prisma.user.findUnique({
-      where: { email: "test-reg-forbidden@pos.test" },
+      where: { email: "test-reg-forbidden@reg.test" },
     });
     expect(stored).toBeNull();
   });
@@ -87,7 +87,7 @@ describe("registerUser (integration — PostgreSQL)", () => {
 
     const result = await registerUser({
       name: "Anónimo",
-      email: "test-reg-unauthorized@pos.test",
+      email: "test-reg-unauthorized@reg.test",
       password: TEST_PASSWORD,
       role: "cashier",
     });

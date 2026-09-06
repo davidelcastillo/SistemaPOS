@@ -8,12 +8,12 @@ import { authenticate } from "@/lib/auth/authenticate";
  * (Docker container `mi-postgres`, DATABASE_URL). Covers R-2 (Zod before DB,
  * findUnique, bcrypt.compare) and R-3 (role in the returned user).
  */
-const TEST_EMAIL = "test-auth-ok@pos.test";
+const TEST_EMAIL = "test-auth-ok@auth.test";
 const TEST_PASSWORD = "secreto123";
 
 async function cleanupTestUsers() {
   await prisma.user.deleteMany({
-    where: { email: { contains: "@pos.test" } },
+    where: { email: { contains: "@auth.test" } },
   });
 }
 
@@ -57,7 +57,7 @@ describe("authenticate (integration — PostgreSQL)", () => {
 
   it("returns null for a missing email without revealing existence", async () => {
     const user = await authenticate({
-      email: "no-existe@pos.test",
+      email: "no-existe@auth.test",
       password: TEST_PASSWORD,
     });
     expect(user).toBeNull();
@@ -72,7 +72,7 @@ describe("authenticate (integration — PostgreSQL)", () => {
   });
 
   it("returns null for a non-admin role user (cashier)", async () => {
-    const cashierEmail = "test-auth-cashier@pos.test";
+    const cashierEmail = "test-auth-cashier@auth.test";
     const password = await bcrypt.hash(TEST_PASSWORD, 10);
     await prisma.user.create({
       data: {
