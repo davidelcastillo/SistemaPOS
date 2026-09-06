@@ -29,7 +29,7 @@ Autenticación fundacional del POS con NextAuth v4 sobre Next.js 16:
 
 ## Flujo de autenticación
 
-```
+```text
 Browser ──signIn("credentials")──> /api/auth/* ── authorize()
                                          ├─ loginSchema (Zod)
                                          ├─ prisma.user.findUnique
