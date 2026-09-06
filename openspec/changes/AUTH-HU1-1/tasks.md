@@ -29,39 +29,39 @@ Chain strategy: pending
 
 ## Fase 1: Fundación de datos (dueño David)
 
-- [ ] 1.1 Cambiar enum `Role` en `prisma/schema.prisma` a minúsculas (`admin`/`cashier`); coordinar compañero; `docker ps`
-- [ ] 1.2 Migración init atómica `npm run db:migrate -- --name init` (17 modelos); `npx prisma migrate status` sin drift (R-6)
-- [ ] 1.3 `tsx` devDep en `package.json`; `migrations.seed` en `prisma.config.ts`; crear `prisma/seed.ts` idempotente (admin, bcrypt r10)
-- [ ] 1.4 `npx prisma db seed` dos veces → exactamente 1 admin (R-7)
+- [x] 1.1 Cambiar enum `Role` en `prisma/schema.prisma` a minúsculas (`admin`/`cashier`); coordinar compañero; `docker ps`
+- [x] 1.2 Migración init atómica `npm run db:migrate -- --name init` (17 modelos); `npx prisma migrate status` sin drift (R-6)
+- [x] 1.3 `tsx` devDep en `package.json`; `migrations.seed` en `prisma.config.ts`; crear `prisma/seed.ts` idempotente (admin, bcrypt r10)
+- [x] 1.4 `npx prisma db seed` dos veces → exactamente 1 admin (R-7)
 
 ## Fase 2: Contrato de datos
 
-- [ ] 2.1 \[RED\] `src/lib/validations/validations.test.ts`: `DUPLICATE_EMAIL` como código válido (falla)
-- [ ] 2.2 \[GREEN\] Agregar `DUPLICATE_EMAIL` a `ErrorCode`/`ERROR_CODES` en `src/lib/validations/result.ts` (shared, coordinación)
-- [ ] 2.3 \[RED\] `src/lib/auth/schemas.test.ts`: registerSchema bordes (ok, email inválido, password <8, role inválido)
-- [ ] 2.4 \[GREEN\] Crear `src/lib/auth/schemas.ts` (registerSchema + `RegisterInput` z.infer)
+- [x] 2.1 \[RED\] `src/lib/validations/validations.test.ts`: `DUPLICATE_EMAIL` como código válido (falla)
+- [x] 2.2 \[GREEN\] Agregar `DUPLICATE_EMAIL` a `ErrorCode`/`ERROR_CODES` en `src/lib/validations/result.ts` (shared, coordinación)
+- [x] 2.3 \[RED\] `src/lib/auth/schemas.test.ts`: registerSchema bordes (ok, email inválido, password <8, role inválido)
+- [x] 2.4 \[GREEN\] Crear `src/lib/auth/schemas.ts` (registerSchema + `RegisterInput` z.infer)
 
 ## Fase 3: Núcleo auth (helper puro → authorize → route handler)
 
-- [ ] 3.1 \[RED\] `src/lib/auth/authenticate.test.ts`: válido → `{id,role}`; password errónea → null; email inexistente → null
-- [ ] 3.2 \[GREEN\] Crear `src/lib/auth/authenticate.ts` (helper puro: loginSchema → findUnique → bcrypt.compare r10)
-- [ ] 3.3 \[RED\] Integración `authenticate` contra PostgreSQL (R-2/R-3): login ok con role; inválido → null; payload inválido sin consultar BD
-- [ ] 3.4 \[GREEN\] Completar `src/lib/auth.ts`: authorize = Zod → authenticate → `{id,email,role}`; callbacks jwt/session tipados (R4 `token.role`)
-- [ ] 3.5 Crear `src/app/api/auth/[...nextauth]/route.ts` (GET/POST = `NextAuth(authOptions)`); smoke `/api/auth/session` → 200
+- [x] 3.1 \[RED\] `src/lib/auth/authenticate.test.ts`: válido → `{id,role}`; password errónea → null; email inexistente → null
+- [x] 3.2 \[GREEN\] Crear `src/lib/auth/authenticate.ts` (helper puro: loginSchema → findUnique → bcrypt.compare r10)
+- [x] 3.3 \[RED\] Integración `authenticate` contra PostgreSQL (R-2/R-3): login ok con role; inválido → null; payload inválido sin consultar BD
+- [x] 3.4 \[GREEN\] Completar `src/lib/auth.ts`: authorize = Zod → authenticate → `{id,email,role}`; callbacks jwt/session tipados (R4 `token.role`)
+- [x] 3.5 Crear `src/app/api/auth/[...nextauth]/route.ts` (GET/POST = `NextAuth(authOptions)`); smoke `/api/auth/session` → 200
 
 ## Fase 4: Server Action registerUser
 
-- [ ] 4.1 \[RED\] `src/actions/auth.test.ts` (integración): admin ok; cashier → FORBIDDEN; sin sesión → UNAUTHORIZED; email dup → DUPLICATE_EMAIL; Zod → VALIDATION_ERROR
-- [ ] 4.2 \[GREEN\] Implementar `registerUser` en `src/actions/auth.ts` ("use server"; getServerSession rol admin; bcrypt.hash r10; P2002 → DUPLICATE_EMAIL; `ActionResult<{id,email,role}>`)
+- [x] 4.1 \[RED\] `src/actions/auth.test.ts` (integración): admin ok; cashier → FORBIDDEN; sin sesión → UNAUTHORIZED; email dup → DUPLICATE_EMAIL; Zod → VALIDATION_ERROR
+- [x] 4.2 \[GREEN\] Implementar `registerUser` en `src/actions/auth.ts` ("use server"; getServerSession rol admin; bcrypt.hash r10; P2002 → DUPLICATE_EMAIL; `ActionResult<{id,email,role}>`)
 
 ## Fase 5: Proxy y entorno
 
-- [ ] 5.1 `.env`: `NEXTAUTH_URL` + `NEXTAUTH_SECRET` (`crypto.randomBytes(32)` base64, no versionar)
-- [ ] 5.2 Codemod `npx @next/codemod@canary middleware-to-proxy .` → `src/proxy.ts`; borrar `src/middleware.ts`; conservar `export const config`
-- [ ] 5.3 Redirect por sesión en `src/proxy.ts` (`getToken`; protegida sin token → `/login`; `token.role` punto de extensión HU-1.2)
+- [x] 5.1 `.env`: `NEXTAUTH_URL` + `NEXTAUTH_SECRET` (`crypto.randomBytes(32)` base64, no versionar)
+- [x] 5.2 Codemod `npx @next/codemod@canary middleware-to-proxy .` → `src/proxy.ts`; borrar `src/middleware.ts`; conservar `export const config`
+- [x] 5.3 Redirect por sesión en `src/proxy.ts` (`getToken`; protegida sin token → `/login`; `token.role` punto de extensión HU-1.2)
 
 ## Fase 6: Verificación y cierre
 
-- [ ] 6.1 `npm test` verde + coverage ≥80% superficie probada
-- [ ] 6.2 `npm run build` compila; sin warning de deprecación middleware
-- [ ] 6.3 Crear `docs/auth.md` (DoD); avisar compañero de archivos calientes tocados
+- [x] 6.1 `npm test` verde + coverage ≥80% superficie probada
+- [x] 6.2 `npm run build` compila; sin warning de deprecación middleware
+- [x] 6.3 Crear `docs/auth.md` (DoD); avisar compañero de archivos calientes tocados
