@@ -1,13 +1,15 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { authenticate } from "@/lib/auth/authenticate";
 
 /**
- * Structural authOptions shell — FASE 0.
+ * NextAuth v4 configuration — Credentials Provider (HU-1.1).
  *
- * No credential validation yet: `authorize` always returns null (HU-1.1 fills
- * this with bcrypt verification against the `User` table). The JWT callbacks
- * already transport `id` and `role` so the role-based middleware (HU-1.2) can
- * read them once a real session exists.
+ * `authorize` delegates to the pure `authenticate` helper (Zod → findUnique →
+ * bcrypt r10) and returns `{ id, email, role }` on success. The JWT callbacks
+ * transport `id` and `role` so the role-based proxy (HU-1.2) and server
+ * actions can read them; `token.role` is always set from the authenticated
+ * user (R-3/R-4).
  */
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -19,9 +21,9 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      // TODO Auth (HU-1.1): verify credentials with bcrypt (10 rounds) and
-      // return the user with `id` + `role` from the database.
-      authorize: async () => null,
+      async authorize(credentials) {
+        return authenticate(credentials);
+      },
     }),
   ],
   callbacks: {
