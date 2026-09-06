@@ -1,12 +1,15 @@
+import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Proxy (Next 16) — migrated from middleware.ts via the official
- * `middleware-to-proxy` codemod (HU-1.1).
+ * `middleware-to-proxy` codemod. Runs on the Node.js runtime (default), so
+ * `getToken`/Prisma work without edge workarounds.
  *
- * Role matrix — FASE 0 (structural shell). The access matrix is documented
- * here; role-based enforcement lands in HU-1.2 (proxy by role). HU-1.1 adds
- * the minimal session redirect: no token on a protected route -> /login.
+ * HU-1.1 (minimal behavior): a protected route without a session token is
+ * redirected to `/login`. The role matrix is HU-1.2 — `token.role` is the
+ * extension point for role-based branching.
  *
  * | Route               | Public | Cashier        | Admin |
  * |---------------------|--------|----------------|-------|
@@ -21,7 +24,17 @@ import { NextResponse } from "next/server";
  * Mutations are always re-validated server-side by role (e.g. createPurchase
  * is admin-only even though cashier can read /compras).
  */
-export function proxy() {
+export async function proxy(request: NextRequest) {
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  if (!token) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return NextResponse.next();
 }
 
