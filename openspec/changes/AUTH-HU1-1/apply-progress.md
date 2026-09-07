@@ -1,8 +1,8 @@
 # Apply Progress: AUTH-HU1-1 — Autenticación y manejo de credenciales (flujo Backend + Flujo Frontend)
 
-> Fase: apply · Flujo: backend (1º de 2, completado) + frontend (2º de 2, en curso).
+> Fase: apply · Flujo: backend (1º de 2, completado) + frontend (2º de 2, completado).
 > Estrategia: feature-branch-chain (4 PRs backend + tracker #6; 2 PRs frontend #11/#12).
-> Todas las tareas backend (21/21) completadas; frontend F1–F6 completadas, F7–F11 en curso.
+> Todas las tareas backend (21/21) y frontend (F1–F11) completadas.
 
 ## Resumen
 
@@ -90,7 +90,7 @@ main
 
 ---
 
-# Flujo Frontend (2º de 2) — UI /login + SessionProvider + E2E + correcciones W1/W2
+## Flujo Frontend (2º de 2) — UI /login + SessionProvider + E2E + correcciones W1/W2
 
 > Rama base del flujo: `feat/auth-hu1-1-pr4-entorno` (PR #10). PRs: #11 (F1–F6, UI login) → #12 (F7–F11, W1/W2 + docs + cierre). Estrategia: feature-branch-chain (resuelta).
 
@@ -112,6 +112,22 @@ main
 - [x] F6 Gate: `npm test` + `npm run build` verdes
   - Evidencia: `npm test` 43/43 (coverage 96.15 stmts / 87.5 branch / 88.88 funcs / 95.91 lines, ≥80); `npx tsc --noEmit` 0; `npm run lint` 0; `npm run build` OK (`/login` static, `/api/auth/[...nextauth]` dynamic, `ƒ Proxy (Middleware)` sin warning de deprecación); `npx playwright test` 6/6 (auth 4 + smoke 2).
 
+## Fase 9: Correcciones verify (W1/W2)
+
+- [x] F7 W1: `specs/base-config/spec.md` R-7: `proxyConfig` → `export const config` (2 menciones)
+  - Evidencia: las 2 menciones de `proxyConfig` reemplazadas por `export const config` (requirement + scenario "Rename sin regresión"), alineado con design §1 y el codemod real. `src/proxy.ts` NO se tocó. Commit `docs(sdd): align base-config delta and exposure map with proxy convention` (PR #12).
+- [x] F8 W2: `docs/mapa-exposicion.md`: `src/middleware.ts` → `src/proxy.ts` (líneas 12, 33-35, 52, 57)
+  - Evidencia: 4 referencias corregidas (tabla módulo 1, matriz de roles del proxy, plan de cobertura ×2). Sin referencias `middleware` restantes en el mapa. Mismo commit que F7 (PR #12).
+- [x] F9 `docs/auth.md`: sección flujo frontend (UI login, SessionProvider, E2E)
+  - Evidencia: sección "Frontend (HU-1.1, R-5)" + nota técnica Prisma ESM/Playwright + testing E2E en gates. Commit `docs(auth): document login UI, SessionProvider and E2E flow` (PR #12).
+
+## Fase 10: Verificación y cierre frontend
+
+- [x] F10 `npx playwright test` completo verde (login ok admin/cashier + fallo + redirect + smoke)
+  - Evidencia: **6/6 E2E** (auth 4: admin → /dashboard, cashier → /dashboard, malas credenciales → "Credenciales inválidas" en /login, campos inválidos sin llamar signIn; smoke 2: no-auth → /login, admin → /dashboard). Gates finales: `npm test` 43/43 (coverage 96.15/87.5/88.88/95.91), `npx tsc --noEmit` 0, `npm run lint` 0, `npm run build` OK.
+- [x] F11 Avisar compañero de hot files en tracker #6; work-unit commits por unidad (PR #11, PR #12)
+  - Evidencia: comentario en PR tracker #6 con hot files del frontend (`src/app/layout.tsx`, `src/components/providers.tsx`, `package.json` +`@hookform/resolvers`). Commits por unidad de trabajo: PR #11 = 7 commits (docs sdd, resolvers, SessionProvider, spec E2E, login page, smoke B, progress F1-F6); PR #12 = 4 commits (W1/W2, docs/auth, warm-up smoke, cierre tasks/progress).
+
 ## Cadena de PRs actualizada (feature-branch-chain)
 
 ```text
@@ -121,14 +137,14 @@ main
            └── feat/auth-hu1-1-pr2-contrato  → PR #8
                 └── feat/auth-hu1-1-pr3-wiring  → PR #9
                      └── feat/auth-hu1-1-pr4-entorno  → PR #10
-                          └── feat/auth-hu1-1-pr5-frontend-ui  → PR #11 (F1–F6)  📍
-                               └── feat/auth-hu1-1-pr6-frontend-cierre → PR #12 (F7–F11)
+                          └── feat/auth-hu1-1-pr5-frontend-ui  → PR #11 (F1–F6)
+                               └── feat/auth-hu1-1-pr6-frontend-cierre → PR #12 (F7–F11)  📍
 ```
 
 ## Desviaciones y notas del flujo frontend
 
 - **Playwright + Prisma ESM**: el cliente Prisma 7 generado usa `import.meta` (ESM-only); el transform CJS de Playwright no lo carga desde un spec. Solución: fixture en script `tsx` (`e2e/fixtures/cashier.ts`) invocado con `execSync`, y spec como `.mts`.
-- **Dev server lento (network drive)**: Turbopack compila las rutas API de forma lazy; el primer hit a `/api/auth/*` puede superar el timeout por defecto de expect. Solución: warm-up de `/api/auth/session` + `/api/auth/providers` en `beforeAll` y timeout 30s en las aserciones de URL post-login.
+- **Dev server lento (network drive)**: Turbopack compila las rutas API de forma lazy; el primer hit a `/api/auth/*` puede superar el timeout por defecto de expect. Solución: warm-up de `/api/auth/session` + `/api/auth/providers` en `beforeAll` (ambos specs) y timeout 30s en las aserciones de URL post-login.
 - **redirect por rol diferido**: HU-1.1 redirige ambas roles a `/dashboard` (consistente con `page.tsx`); la matriz por rol (cashier → /ventas) es HU-1.2 en `proxy.ts`.
-
-> Pendiente (PR #12): F7 (W1 base-config spec), F8 (W2 mapa-exposicion), F9 (docs/auth.md), F10 (E2E completa), F11 (aviso compañero + cierre).
+- **Lint markdown**: el apply-progress con dos H1 viola `markdown/no-multiple-h1` → la sección frontend se documenta como H2.
+- **`SessionProvider` directo en layout falla**: requiere wrapper client (`src/components/providers.tsx`) — patrón oficial NextAuth v4 App Router.
