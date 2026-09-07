@@ -1,4 +1,4 @@
-# Tasks: AUTH-HU1-1 — Autenticación y manejo de credenciales (flujo Backend, 1º de 2)
+# Tasks: AUTH-HU1-1 — Autenticación y manejo de credenciales (Backend 1º completado + Flujo Frontend 2º)
 
 ## Review Workload Forecast
 
@@ -9,11 +9,11 @@
 | PRs encadenados recomendados | Yes |
 | Split sugerido | PR 1 → PR 2 → PR 3 → PR 4 |
 | Estrategia de entrega | ask-on-risk |
-| Estrategia de cadena | pending |
+| Estrategia de cadena | feature-branch-chain (resuelta) |
 
-Decision needed before apply: Yes
+Decision needed before apply: No
 Chained PRs recommended: Yes
-Chain strategy: pending
+Chain strategy: feature-branch-chain
 400-line budget risk: High
 
 ### Unidades de trabajo sugeridas
@@ -65,3 +65,55 @@ Chain strategy: pending
 - [x] 6.1 `npm test` verde + coverage ≥80% superficie probada
 - [x] 6.2 `npm run build` compila; sin warning de deprecación middleware
 - [x] 6.3 Crear `docs/auth.md` (DoD); avisar compañero de archivos calientes tocados
+
+---
+
+## Flujo Frontend (2º) — UI /login + SessionProvider + E2E + correcciones W1/W2
+
+### Review Workload Forecast (flujo frontend)
+
+| Campo | Valor |
+|---|---|
+| Líneas cambiadas estimadas | ~280–350 |
+| Riesgo presupuesto 400 líneas | Medium |
+| PRs encadenados recomendados | Yes |
+| Split sugerido | PR #11 (UI) → PR #12 (E2E + W1/W2) |
+| Estrategia de entrega | ask-on-risk (resuelta: encadenados) |
+| Estrategia de cadena | feature-branch-chain |
+
+Decision needed before apply: No
+Chained PRs recommended: Yes
+Chain strategy: feature-branch-chain
+400-line budget risk: Medium
+
+### Unidades de trabajo sugeridas
+
+| Unidad | Meta | PR (base) | Test enfocado | Harness runtime | Límite de rollback |
+|---|---|---|---|---|---|
+| 1 | Fundación + UI login | PR #11 (base: rama PR #10) | `npm run build` + `npm test` | `npm run dev`: login admin@pos.com → /dashboard; malas credenciales → "Credenciales inválidas" | Revertir `src/app/(auth)/login/page.tsx` + `src/app/layout.tsx` + dep (sin BD) |
+| 2 | E2E auth + W1/W2 | PR #12 (base: rama PR #11) | `npx playwright test e2e/auth.spec.ts` | Playwright webServer (`next dev`) + seed admin | Revertir `e2e/auth.spec.ts`, `e2e/smoke.spec.ts`, delta `base-config`, `docs/mapa-exposicion.md` |
+
+> Archivos calientes (aviso compañero): `src/app/layout.tsx`, `package.json`. `src/proxy.ts` y `src/lib/auth.ts` NO se tocan (implementados).
+
+## Fase 7: Fundación frontend
+
+- [ ] F1 Instalar `@hookform/resolvers` (latest, compat Zod v4) en `package.json`; avisar compañero (hot)
+- [ ] F2 `src/app/layout.tsx`: envolver `{children}` con `SessionProvider` (hot, coordinado)
+
+## Fase 8: E2E RED + UI login GREEN (R-5)
+
+- [ ] F3 \[RED\] `e2e/auth.spec.ts`: login ok admin/cashier → `/dashboard`; credenciales inválidas → "Credenciales inválidas" sin salir de `/login`; campos inválidos sin llamar signIn (falla contra placeholder)
+- [ ] F4 \[GREEN\] `src/app/(auth)/login/page.tsx`: client RHF + `zodResolver(loginSchema)`; `signIn("credentials",{redirect:false})`; loading/error; éxito → `router.push(callbackUrl \|\| "/dashboard")`; estilo `.STYLES.md` (flat, bordes 1px, foco accent, sin sombras)
+- [ ] F5 `e2e/smoke.spec.ts`: habilitar scenario B (quitar `test.skip`) — admin → `/dashboard`
+- [ ] F6 Gate: `npm test` + `npm run build` verdes
+
+## Fase 9: Correcciones verify (W1/W2)
+
+- [ ] F7 W1: `openspec/changes/AUTH-HU1-1/specs/base-config/spec.md` R-7: `proxyConfig` → `export const config` (2 menciones); NO tocar `src/proxy.ts`
+- [ ] F8 W2: `docs/mapa-exposicion.md`: `src/middleware.ts` → `src/proxy.ts` (líneas 12, 33-35, 52, 57)
+- [ ] F9 Opcional: `docs/auth.md`: sección flujo frontend (UI login, SessionProvider, E2E) si aporta
+
+## Fase 10: Verificación y cierre frontend
+
+- [ ] F10 `npx playwright test e2e/auth.spec.ts` verde (login ok admin/cashier + fallo + redirect)
+- [ ] F11 Avisar compañero de hot files en tracker #6; work-unit commits por unidad (PR #11, PR #12)
