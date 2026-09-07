@@ -17,8 +17,11 @@ const UNEXPECTED_ERROR_MESSAGE = "No se pudo completar la operación";
  */
 function p2002Target(meta: Record<string, unknown> | undefined): string | undefined {
   const rawTarget = meta?.target;
-  if (rawTarget !== undefined) {
-    return Array.isArray(rawTarget) ? rawTarget[0] : rawTarget;
+  if (typeof rawTarget === "string") {
+    return rawTarget;
+  }
+  if (Array.isArray(rawTarget) && typeof rawTarget[0] === "string") {
+    return rawTarget[0];
   }
   const driverAdapterError = meta?.driverAdapterError as
     | { cause?: { constraint?: { fields?: string[] } } }

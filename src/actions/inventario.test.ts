@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/inventario/session";
 import { buildSku } from "@/lib/inventario/combinations";
+import type { ActionResult } from "@/lib/validations/result";
 import {
   createCategory,
   createProduct,
@@ -40,7 +41,7 @@ let rojoId: string;
 let azulId: string;
 let sId: string;
 let mId: string;
-let mutations: [string, () => Promise<unknown>][];
+let mutations: [string, () => Promise<ActionResult<unknown>>][];
 
 function productPayload(overrides: Record<string, unknown> = {}) {
   return {
