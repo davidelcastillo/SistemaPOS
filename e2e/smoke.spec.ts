@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Smoke redirect spec — FASE 0.
+ * Smoke redirect spec — FASE 0 + HU-1.1.
  *
  * Scenario A (unauthenticated → /login) is ACTIVE: page.tsx must redirect
  * root by session state (`getServerSession(authOptions)`).
  *
- * Scenario B (admin → /dashboard) is SKIPPED until HU-1.1 provides a real
- * authentication flow to seed a session.
+ * Scenario B (admin → /dashboard) is ACTIVE since HU-1.1: it seeds a session
+ * through the real /login flow, then asserts the root redirect keeps the
+ * authenticated visitor on /dashboard.
  */
 test.describe("root redirect", () => {
   test("redirects unauthenticated visitors to /login", async ({ page }) => {
@@ -15,8 +16,14 @@ test.describe("root redirect", () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
-  // TODO Auth (HU-1.1): enable once a session can be seeded via the login flow.
-  test.skip("redirects authenticated admins to /dashboard", async ({ page }) => {
+  test("redirects authenticated admins to /dashboard", async ({ page }) => {
+    // Seed a session via the login flow (admin@pos.com from prisma/seed.ts).
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("admin@pos.com");
+    await page.getByLabel("Contraseña").fill("admin123");
+    await page.getByRole("button", { name: "Ingresar" }).click();
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+
     await page.goto("/");
     await expect(page).toHaveURL(/\/dashboard$/);
   });
