@@ -11,6 +11,13 @@ import { expect, test } from "@playwright/test";
  * authenticated visitor on /dashboard.
  */
 test.describe("root redirect", () => {
+  test.beforeAll(async () => {
+    // Warm up the NextAuth route handler (Turbopack lazy-compiles API routes;
+    // on this slow drive the first hit can exceed the default expect timeout).
+    await fetch("http://localhost:3000/api/auth/session");
+    await fetch("http://localhost:3000/api/auth/providers");
+  });
+
   test("redirects unauthenticated visitors to /login", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/login$/);
