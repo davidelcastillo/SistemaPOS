@@ -97,15 +97,15 @@ Chain strategy: feature-branch-chain
 
 ## Fase 7: Fundación frontend
 
-- [ ] F1 Instalar `@hookform/resolvers` (latest, compat Zod v4) en `package.json`; avisar compañero (hot)
-- [ ] F2 `src/app/layout.tsx`: envolver `{children}` con `SessionProvider` (hot, coordinado)
+- [x] F1 Instalar `@hookform/resolvers` (latest, compat Zod v4) en `package.json`; avisar compañero (hot)
+- [x] F2 `src/app/layout.tsx`: envolver `{children}` con `SessionProvider` (hot, coordinado)
 
 ## Fase 8: E2E RED + UI login GREEN (R-5)
 
-- [ ] F3 \[RED\] `e2e/auth.spec.ts`: login ok admin/cashier → `/dashboard`; credenciales inválidas → "Credenciales inválidas" sin salir de `/login`; campos inválidos sin llamar signIn (falla contra placeholder)
-- [ ] F4 \[GREEN\] `src/app/(auth)/login/page.tsx`: client RHF + `zodResolver(loginSchema)`; `signIn("credentials",{redirect:false})`; loading/error; éxito → `router.push(callbackUrl \|\| "/dashboard")`; estilo `.STYLES.md` (flat, bordes 1px, foco accent, sin sombras)
-- [ ] F5 `e2e/smoke.spec.ts`: habilitar scenario B (quitar `test.skip`) — admin → `/dashboard`
-- [ ] F6 Gate: `npm test` + `npm run build` verdes
+- [x] F3 \[RED\] `e2e/auth.spec.ts`: login ok admin/cashier → `/dashboard`; credenciales inválidas → "Credenciales inválidas" sin salir de `/login`; campos inválidos sin llamar signIn (falla contra placeholder)
+- [x] F4 \[GREEN\] `src/app/(auth)/login/page.tsx`: client RHF + `zodResolver(loginSchema)`; `signIn("credentials",{redirect:false})`; loading/error; éxito → `router.push(callbackUrl \|\| "/dashboard")`; estilo `.STYLES.md` (flat, bordes 1px, foco accent, sin sombras)
+- [x] F5 `e2e/smoke.spec.ts`: habilitar scenario B (quitar `test.skip`) — admin → `/dashboard`
+- [x] F6 Gate: `npm test` + `npm run build` verdes
 
 ## Fase 9: Correcciones verify (W1/W2)
 
