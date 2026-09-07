@@ -1,7 +1,8 @@
-# Apply Progress: AUTH-HU1-1 — Autenticación y manejo de credenciales (flujo Backend)
+# Apply Progress: AUTH-HU1-1 — Autenticación y manejo de credenciales (flujo Backend + Flujo Frontend)
 
-> Fase: apply · Flujo: backend (1º de 2) · Estrategia: feature-branch-chain (4 PRs + tracker).
-> Todas las tareas completadas (21/21). La UI `/login`, `SessionProvider` y E2E pertenecen al flujo frontend.
+> Fase: apply · Flujo: backend (1º de 2, completado) + frontend (2º de 2, en curso).
+> Estrategia: feature-branch-chain (4 PRs backend + tracker #6; 2 PRs frontend #11/#12).
+> Todas las tareas backend (21/21) completadas; frontend F1–F6 completadas, F7–F11 en curso.
 
 ## Resumen
 
@@ -86,3 +87,48 @@ main
 - **Lint markdown pre-existente**: 8 errores en `archive-report.md` de Fase 0 corregidos (chore en tracker) para dejar el gate lint en verde.
 - **.env.example**: creado localmente pero cubierto por el patrón `.env*` del `.gitignore`; no se versiona.
 - **AGENTS.md**: bloque `nextjs-agent-rules` regenerado por `next dev`; commiteado en PR4 (chore) para mantener el árbol limpio.
+
+---
+
+# Flujo Frontend (2º de 2) — UI /login + SessionProvider + E2E + correcciones W1/W2
+
+> Rama base del flujo: `feat/auth-hu1-1-pr4-entorno` (PR #10). PRs: #11 (F1–F6, UI login) → #12 (F7–F11, W1/W2 + docs + cierre). Estrategia: feature-branch-chain (resuelta).
+
+## Fase 7: Fundación frontend
+
+- [x] F1 Instalar `@hookform/resolvers` (latest, compat Zod v4); avisar compañero (hot)
+  - Evidencia: `@hookform/resolvers ^5.9.1` en `package.json` (auto-detecta Zod v4, verificado con Context7). Commit `feat(auth): add @hookform/resolvers for login form validation` (PR #11). Hot file: `package.json` (+lockfile) — listado en el aviso al compañero (tracker #6).
+- [x] F2 `src/app/layout.tsx`: envolver `{children}` con `SessionProvider` (hot, coordinado)
+  - Evidencia: `SessionProvider` montado vía wrapper client `src/components/providers.tsx` (patrón oficial NextAuth v4 App Router — importar `SessionProvider` directo desde layout Server Component falla con "React Context is unavailable in Server Components"). Commit `feat(auth): provide session state to the app via SessionProvider` (PR #11). Hot file: `src/app/layout.tsx` — listado en el aviso.
+
+## Fase 8: E2E RED + UI login GREEN (R-5)
+
+- [x] F3 \[RED\] `e2e/auth.spec.ts` (implementado como `e2e/auth.spec.mts`): login ok admin/cashier → `/dashboard`; credenciales inválidas → "Credenciales inválidas" sin salir de `/login`; campos inválidos sin llamar signIn
+  - Evidencia RED: contra el placeholder (Fase 0) el spec falla (`waiting for getByLabel('Email')` — no existe form). Nota: el fixture cashier se crea/elimina vía `e2e/fixtures/cashier.ts` (script `tsx`, porque el cliente Prisma generado es ESM-only y el transform CJS de Playwright no lo carga — mismo patrón que `prisma/seed.ts`). Commit `test(auth): add E2E login flow spec against placeholder` (PR #11).
+- [x] F4 \[GREEN\] `src/app/(auth)/login/page.tsx`: client RHF + `zodResolver(loginSchema)`; `signIn("credentials",{redirect:false})`; loading/error; éxito → `router.push(callbackUrl || "/dashboard")`; estilo `.STYLES.md` (flat, bordes 1px, foco accent, sin sombras)
+  - Evidencia GREEN: 4/4 E2E pasan (admin → /dashboard, cashier → /dashboard, malas credenciales → error + permanece en /login, campos inválidos → errores por campo sin llamar signIn — verificado con listener de red). Redirect por rol es HU-1.2 (en HU-1.1 ambas roles → `/dashboard`, consistente con `src/app/page.tsx`). Commit `feat(auth): build reactive login page with react-hook-form` (PR #11).
+- [x] F5 `e2e/smoke.spec.ts`: habilitar scenario B (quitar `test.skip`) — admin → `/dashboard`
+  - Evidencia: scenario B activo, siembra sesión vía flujo real de login y verifica redirect de `/` → `/dashboard`. Commit `test(auth): enable authenticated redirect smoke scenario` (PR #11).
+- [x] F6 Gate: `npm test` + `npm run build` verdes
+  - Evidencia: `npm test` 43/43 (coverage 96.15 stmts / 87.5 branch / 88.88 funcs / 95.91 lines, ≥80); `npx tsc --noEmit` 0; `npm run lint` 0; `npm run build` OK (`/login` static, `/api/auth/[...nextauth]` dynamic, `ƒ Proxy (Middleware)` sin warning de deprecación); `npx playwright test` 6/6 (auth 4 + smoke 2).
+
+## Cadena de PRs actualizada (feature-branch-chain)
+
+```text
+main
+ └── feat/auth-hu1-1  → PR #6 (tracker, draft/no-merge)
+      └── feat/auth-hu1-1-pr1-datos     → PR #7
+           └── feat/auth-hu1-1-pr2-contrato  → PR #8
+                └── feat/auth-hu1-1-pr3-wiring  → PR #9
+                     └── feat/auth-hu1-1-pr4-entorno  → PR #10
+                          └── feat/auth-hu1-1-pr5-frontend-ui  → PR #11 (F1–F6)  📍
+                               └── feat/auth-hu1-1-pr6-frontend-cierre → PR #12 (F7–F11)
+```
+
+## Desviaciones y notas del flujo frontend
+
+- **Playwright + Prisma ESM**: el cliente Prisma 7 generado usa `import.meta` (ESM-only); el transform CJS de Playwright no lo carga desde un spec. Solución: fixture en script `tsx` (`e2e/fixtures/cashier.ts`) invocado con `execSync`, y spec como `.mts`.
+- **Dev server lento (network drive)**: Turbopack compila las rutas API de forma lazy; el primer hit a `/api/auth/*` puede superar el timeout por defecto de expect. Solución: warm-up de `/api/auth/session` + `/api/auth/providers` en `beforeAll` y timeout 30s en las aserciones de URL post-login.
+- **redirect por rol diferido**: HU-1.1 redirige ambas roles a `/dashboard` (consistente con `page.tsx`); la matriz por rol (cashier → /ventas) es HU-1.2 en `proxy.ts`.
+
+> Pendiente (PR #12): F7 (W1 base-config spec), F8 (W2 mapa-exposicion), F9 (docs/auth.md), F10 (E2E completa), F11 (aviso compañero + cierre).
