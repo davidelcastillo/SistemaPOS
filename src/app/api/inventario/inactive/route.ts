@@ -12,7 +12,7 @@ const FORBIDDEN_MESSAGE = "No tenés permisos para realizar esta acción";
  * GET /api/inventario/inactive — soft-deleted variants for the `/inactivos`
  * page (SD-R3). Admin-only; feeds the reactivation flow.
  */
-export async function GET(_request: Request): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const session = await getSession();
   if (!session) {
     return NextResponse.json(failure("UNAUTHORIZED", UNAUTHORIZED_MESSAGE), { status: 401 });

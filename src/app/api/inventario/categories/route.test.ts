@@ -38,7 +38,7 @@ beforeEach(() => {
 describe("GET /api/inventario/categories (CM-R3/R4)", () => {
   it("lists active categories ordered by name ascending", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
-    const res = await GET(new Request("http://localhost/api/inventario/categories"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -48,7 +48,7 @@ describe("GET /api/inventario/categories (CM-R3/R4)", () => {
 
   it("does not expose soft-deleted categories (CM-R4)", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
-    const res = await GET(new Request("http://localhost/api/inventario/categories"));
+    const res = await GET();
     const body = await res.json();
     const names = body.data.map((c: { name: string }) => c.name);
     expect(names).not.toContain(`${prefix}-Oculta`);
@@ -57,7 +57,7 @@ describe("GET /api/inventario/categories (CM-R3/R4)", () => {
   it("models an empty catalog without error", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
     const spy = vi.spyOn(prisma.category, "findMany").mockResolvedValueOnce([]);
-    const res = await GET(new Request("http://localhost/api/inventario/categories"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -67,7 +67,7 @@ describe("GET /api/inventario/categories (CM-R3/R4)", () => {
 
   it("is readable by a cashier (CM-R4)", async () => {
     vi.mocked(getSession).mockResolvedValue(cashierSession);
-    const res = await GET(new Request("http://localhost/api/inventario/categories"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -76,7 +76,7 @@ describe("GET /api/inventario/categories (CM-R3/R4)", () => {
 
   it("rejects a missing session with UNAUTHORIZED", async () => {
     vi.mocked(getSession).mockResolvedValue(null);
-    const res = await GET(new Request("http://localhost/api/inventario/categories"));
+    const res = await GET();
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.ok).toBe(false);

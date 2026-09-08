@@ -44,7 +44,7 @@ beforeEach(() => {
 describe("GET /api/inventario/inactive (SD-R3)", () => {
   it("lists soft-deleted variants for an admin with product context", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
-    const res = await GET(new Request("http://localhost/api/inventario/inactive"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -60,7 +60,7 @@ describe("GET /api/inventario/inactive (SD-R3)", () => {
   it("models an empty inactive list without error", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
     const spy = vi.spyOn(prisma.variant, "findMany").mockResolvedValueOnce([]);
-    const res = await GET(new Request("http://localhost/api/inventario/inactive"));
+    const res = await GET();
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -70,7 +70,7 @@ describe("GET /api/inventario/inactive (SD-R3)", () => {
 
   it("rejects a cashier with FORBIDDEN (SD-R3)", async () => {
     vi.mocked(getSession).mockResolvedValue(cashierSession);
-    const res = await GET(new Request("http://localhost/api/inventario/inactive"));
+    const res = await GET();
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.ok).toBe(false);
@@ -79,7 +79,7 @@ describe("GET /api/inventario/inactive (SD-R3)", () => {
 
   it("rejects a missing session with UNAUTHORIZED", async () => {
     vi.mocked(getSession).mockResolvedValue(null);
-    const res = await GET(new Request("http://localhost/api/inventario/inactive"));
+    const res = await GET();
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.ok).toBe(false);
