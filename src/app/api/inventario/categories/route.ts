@@ -12,7 +12,7 @@ const UNAUTHORIZED_MESSAGE = "Iniciá sesión para continuar";
  * GET /api/inventario/categories — active categories for product forms (CM-R3).
  * Read-only for any authenticated role; soft-deleted categories never appear.
  */
-export async function GET(_request: Request): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   const session = await getSession();
   if (!session) {
     return NextResponse.json(failure("UNAUTHORIZED", UNAUTHORIZED_MESSAGE), { status: 401 });
