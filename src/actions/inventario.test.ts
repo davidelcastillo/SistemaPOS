@@ -7,6 +7,7 @@ import { buildSku } from "@/lib/inventario/combinations";
 import type { ActionResult } from "@/lib/validations/result";
 import {
   createCategory,
+  updateCategory,
   createProduct,
   updateProduct,
   updateVariant,
@@ -79,6 +80,7 @@ beforeAll(async () => {
 
   mutations = [
     ["createCategory", () => createCategory({ name: `${prefix}-x` })],
+    ["updateCategory", () => updateCategory({ id: CUID, name: `${prefix}-x` })],
     ["createProduct", () => createProduct(productPayload())],
     ["updateProduct", () => updateProduct({ id: CUID, name: "x" })],
     ["updateVariant", () => updateVariant({ id: CUID, stock: 1 })],
@@ -162,6 +164,50 @@ describe("createCategory (CM-R1)", () => {
   it("returns VALIDATION_ERROR for an invalid payload before any write", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
     const result = await createCategory({ name: "" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+});
+
+describe("updateCategory (L10 gestión de categorías)", () => {
+  it("persists name and description changes and revalidates both paths", async () => {
+    vi.mocked(getSession).mockResolvedValue(adminSession);
+    const created = await createCategory({ name: `${prefix}-Editables`, description: "antes" });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const result = await updateCategory({ id: created.data.id, name: `${prefix}-Renombrada`, description: "después" });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.name).toBe(`${prefix}-Renombrada`);
+    }
+    const row = await prisma.category.findUnique({ where: { id: created.data.id } });
+    expect(row?.name).toBe(`${prefix}-Renombrada`);
+    expect(row?.description).toBe("después");
+    expect(vi.mocked(revalidatePath)).toHaveBeenCalledWith("/inventario");
+    expect(vi.mocked(revalidatePath)).toHaveBeenCalledWith("/api/inventario/categories");
+  });
+
+  it("returns DUPLICATE_CATEGORY when renaming to an existing name and applies no change", async () => {
+    vi.mocked(getSession).mockResolvedValue(adminSession);
+    const first = await createCategory({ name: `${prefix}-Dupe-a` });
+    const second = await createCategory({ name: `${prefix}-Dupe-b` });
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (!first.ok || !second.ok) return;
+    const result = await updateCategory({ id: second.data.id, name: `${prefix}-Dupe-a` });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("DUPLICATE_CATEGORY");
+    }
+    const row = await prisma.category.findUnique({ where: { id: second.data.id } });
+    expect(row?.name).toBe(`${prefix}-Dupe-b`);
+  });
+
+  it("returns VALIDATION_ERROR for an invalid payload", async () => {
+    vi.mocked(getSession).mockResolvedValue(adminSession);
+    const result = await updateCategory({ id: CUID, name: "" });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.code).toBe("VALIDATION_ERROR");

@@ -18,6 +18,13 @@ export const categoryCreateSchema = z.object({
 });
 export type CategoryCreateInput = z.infer<typeof categoryCreateSchema>;
 
+export const categoryUpdateSchema = z.object({
+  id: cuidSchema,
+  name: z.string().min(1, "El nombre es obligatorio").max(60),
+  description: z.string().max(255).optional(),
+});
+export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
+
 export const variantComboSchema = z.object({
   attributeValueIds: z.array(cuidSchema).min(1, "La variante requiere al menos un valor"),
   salePrice: decimalStringSchema,

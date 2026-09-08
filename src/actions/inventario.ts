@@ -7,12 +7,14 @@ import { success, failure } from "@/lib/validations/result";
 import type { ActionResult } from "@/lib/validations/result";
 import {
   categoryCreateSchema,
+  categoryUpdateSchema,
   productCreateSchema,
   productUpdateSchema,
   variantUpdateSchema,
 } from "@/lib/inventario/schemas";
 import type {
   CategoryCreateInput,
+  CategoryUpdateInput,
   ProductCreateInput,
   ProductUpdateInput,
   VariantUpdateInput,
@@ -48,6 +50,22 @@ export async function createCategory(input: CategoryCreateInput): Promise<Action
   try {
     const category = await prisma.category.create({ data: parsed.data });
     revalidatePath("/inventario");
+    return success(category);
+  } catch (e) {
+    return mapPrismaError(e);
+  }
+}
+
+export async function updateCategory(input: CategoryUpdateInput): Promise<ActionResult<Category>> {
+  const gate = await requireAdmin();
+  if (gate) return gate;
+  const parsed = categoryUpdateSchema.safeParse(input);
+  if (!parsed.success) return failure("VALIDATION_ERROR", VALIDATION_MESSAGE);
+  const { id, ...data } = parsed.data;
+  try {
+    const category = await prisma.category.update({ where: { id }, data });
+    revalidatePath("/inventario");
+    revalidatePath("/api/inventario/categories");
     return success(category);
   } catch (e) {
     return mapPrismaError(e);

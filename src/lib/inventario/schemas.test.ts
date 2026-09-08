@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   categoryCreateSchema,
+  categoryUpdateSchema,
   productCreateSchema,
   productUpdateSchema,
   variantUpdateSchema,
@@ -61,6 +62,37 @@ describe("categoryCreateSchema (CM-R1)", () => {
 
   it("rejects a description longer than 255 chars", () => {
     expect(categoryCreateSchema.safeParse({ name: "X", description: "a".repeat(256) }).success).toBe(false);
+  });
+});
+
+describe("categoryUpdateSchema (L10 gestión de categorías)", () => {
+  it("accepts a full update with name and optional description", () => {
+    const parsed = categoryUpdateSchema.safeParse({ id: cuidA, name: "Aguas", description: "Minerales" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.name).toBe("Aguas");
+      expect(parsed.data.description).toBe("Minerales");
+    }
+  });
+
+  it("accepts an update without description", () => {
+    const parsed = categoryUpdateSchema.safeParse({ id: cuidA, name: "Snacks" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.description).toBeUndefined();
+    }
+  });
+
+  it("rejects a non-cuid id", () => {
+    expect(categoryUpdateSchema.safeParse({ id: "not-a-cuid", name: "X" }).success).toBe(false);
+  });
+
+  it("rejects an empty name", () => {
+    expect(categoryUpdateSchema.safeParse({ id: cuidA, name: "" }).success).toBe(false);
+  });
+
+  it("rejects a description longer than 255 chars", () => {
+    expect(categoryUpdateSchema.safeParse({ id: cuidA, name: "X", description: "a".repeat(256) }).success).toBe(false);
   });
 });
 
