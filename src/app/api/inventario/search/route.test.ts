@@ -120,13 +120,15 @@ describe("GET /api/inventario/search (SE-R1)", () => {
     expect(body.error.code).toBe("UNAUTHORIZED");
   });
 
-  it("rejects a missing q with VALIDATION_ERROR", async () => {
+  it("returns all active products when q is empty (catalog load, CRITICAL-1)", async () => {
     vi.mocked(getSession).mockResolvedValue(adminSession);
-    const res = await GET(new Request("http://localhost/api/inventario/search"));
-    expect(res.status).toBe(400);
+    const res = await GET(new Request("http://localhost/api/inventario/search?q="));
+    expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(false);
-    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.ok).toBe(true);
+    const mine = body.data.items.filter((i: { name: string }) => i.name.startsWith(prefix));
+    expect(mine).toHaveLength(1);
+    expect(mine[0].name).toBe(`${prefix}-Coca Cola 500ml`);
   });
 
   it("excludes soft-deleted products (SD-R1)", async () => {

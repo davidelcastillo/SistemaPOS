@@ -33,15 +33,19 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const { q, page, pageSize } = parsed.data;
   const { skip, take } = paginate(page, pageSize);
-  const where = {
-    ...whereActive,
-    OR: [
-      { name: { contains: q, mode: "insensitive" as const } },
-      { description: { contains: q, mode: "insensitive" as const } },
-      { category: { name: { contains: q, mode: "insensitive" as const } } },
-      { variants: { some: { sku: { contains: q, mode: "insensitive" as const } } } },
-    ],
-  };
+  // Empty q = full active catalog (no OR filter). Prisma `contains` is
+  // literal, so no sentinel wildcard is used (fix CRITICAL-1).
+  const where = q
+    ? {
+        ...whereActive,
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { description: { contains: q, mode: "insensitive" as const } },
+          { category: { name: { contains: q, mode: "insensitive" as const } } },
+          { variants: { some: { sku: { contains: q, mode: "insensitive" as const } } } },
+        ],
+      }
+    : whereActive;
 
   const [rows, total] = await Promise.all([
     prisma.product.findMany({

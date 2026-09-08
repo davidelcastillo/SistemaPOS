@@ -50,6 +50,24 @@ describe("inventario client fetchers", () => {
     vi.restoreAllMocks();
   });
 
+  it("searchProducts with an empty query does not use a sentinel wildcard (CRITICAL-1)", async () => {
+    const result: ActionResult<Paginated<ProductSummary>> = success({
+      items: [],
+      page: 1,
+      pageSize: 10,
+      total: 0,
+    });
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(okJson(result));
+
+    const out = await searchProducts("");
+
+    const url = fetchMock.mock.calls[0]?.[0] as string;
+    expect(url).toContain("/api/inventario/search");
+    expect(url).toContain("q=");
+    expect(url).not.toContain("q=*");
+    expect(out).toEqual({ items: [], page: 1, pageSize: 10, total: 0 });
+  });
+
   it("searchProducts fetches /api/inventario/search with the query and unwraps", async () => {
     const result: ActionResult<Paginated<ProductSummary>> = success({
       items: [],

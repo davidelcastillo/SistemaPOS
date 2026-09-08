@@ -200,4 +200,41 @@ describe("ProductForm — edit", () => {
     });
     expect(toast.success).toHaveBeenCalled();
   });
+
+  it("propagates edited variant price/stock to the submit (CRITICAL-2 fix)", async () => {
+    vi.mocked(updateProduct).mockResolvedValue(success(product));
+    vi.mocked(updateVariant).mockResolvedValue({ ok: true, data: {} as never });
+    render(
+      <ProductForm
+        open
+        onClose={vi.fn()}
+        product={summary}
+        attributeGroups={[attrGroup]}
+        variants={comboInputs}
+        skuTemplate="remera"
+        editVariants={[{ id: "ckz8v1x2y0000abc123def458" }]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/nombre/i)).toHaveValue("Remera");
+    });
+
+    // Real edit of the variant row: price 120.00 -> 150.00, stock 5 -> 8
+    const priceInput = screen.getByLabelText("precio ckz8v1x2y0000abc123def460");
+    const stockInput = screen.getByLabelText("stock ckz8v1x2y0000abc123def460");
+    expect(priceInput).toHaveValue("120.00");
+    fireEvent.change(priceInput, { target: { value: "150.00" } });
+    fireEvent.change(stockInput, { target: { value: "8" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /guardar/i }));
+
+    await waitFor(() => {
+      expect(updateVariant).toHaveBeenCalledWith({
+        id: "ckz8v1x2y0000abc123def458",
+        salePrice: "150.00",
+        stock: 8,
+      });
+    });
+  });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -50,6 +50,10 @@ export function ProductForm({
 }: ProductFormProps) {
   const isEdit = Boolean(product);
   const { data: categories } = useCategories();
+  // Variants are OWNED here (not by the parent): VariantMatrix edits flow
+  // through this state so the submit always sends the edited values (fix
+  // CRITICAL-2 — previously the matrix received a no-op onChange).
+  const [variantRows, setVariantRows] = useState<VariantComboInput[]>(variants);
   const { register, handleSubmit, reset, setValue, formState } = useForm<ProductCreateInput>({
     resolver: zodResolver(productCreateSchema) as never,
     defaultValues: EMPTY_CREATE,
@@ -60,16 +64,17 @@ export function ProductForm({
   useEffect(() => {
     if (open) {
       setValue("attributeGroups", attributeGroups, { shouldValidate: true });
-      setValue("variants", variants, { shouldValidate: true });
+      setValue("variants", variantRows, { shouldValidate: true });
       setValue("skuTemplate", skuTemplate, { shouldValidate: true });
     }
-  }, [open, JSON.stringify(attributeGroups), JSON.stringify(variants), skuTemplate]);
+  }, [open, JSON.stringify(attributeGroups), JSON.stringify(variantRows), skuTemplate]);
 
-  // Sync the scalar fields only when the edit target changes (create keeps the
-  // defaultValues). A single run per target — no wiping on re-renders.
+  // Sync the scalar fields and seed the variant rows when the edit target
+  // changes (create keeps the defaultValues). Single run per target.
   const editId = product?.id ?? "";
   useEffect(() => {
     if (open) {
+      setVariantRows(variants);
       reset({
         name: product?.name ?? "",
         description: product?.description ?? "",
@@ -97,13 +102,13 @@ export function ProductForm({
         toast.error(updated.error.message);
         return;
       }
-      for (let i = 0; i < variants.length; i++) {
+      for (let i = 0; i < variantRows.length; i++) {
         const variantRow = editVariants?.[i];
         if (!variantRow) continue;
         const result = await updateVariant({
           id: variantRow.id,
-          salePrice: variants[i]?.salePrice,
-          stock: variants[i]?.stock,
+          salePrice: variantRows[i]?.salePrice,
+          stock: variantRows[i]?.stock,
         });
         if (!result.ok) {
           toast.error(result.error.message);
@@ -119,7 +124,7 @@ export function ProductForm({
       ...values,
       attributeGroups,
       skuTemplate,
-      variants,
+      variants: variantRows,
     });
     if (result.ok) {
       toast.success(`Producto creado: ${result.data.name}`);
@@ -222,7 +227,12 @@ export function ProductForm({
 
           <fieldset className="rounded-[2px] border border-[#4A4A4A]/20 p-4">
             <legend className="px-1 text-sm font-medium text-[#1A1A1A]">Variantes</legend>
-            <VariantMatrix groups={attributeGroups} skuTemplate={skuTemplate} variants={variants} onChange={() => undefined} />
+            <VariantMatrix
+              groups={attributeGroups}
+              skuTemplate={skuTemplate}
+              variants={variantRows}
+              onChange={setVariantRows}
+            />
           </fieldset>
 
           <div className="flex justify-end gap-2 pt-2">

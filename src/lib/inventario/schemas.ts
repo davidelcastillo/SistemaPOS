@@ -68,6 +68,7 @@ export const variantUpdateSchema = z.object({
 export type VariantUpdateInput = z.infer<typeof variantUpdateSchema>;
 
 export const searchQuerySchema = paginationSchema.extend({
-  q: z.string().min(1, "La búsqueda requiere un término"),
+  // Empty q = full active catalog (catalog load on /inventario mount).
+  q: z.string().default(""),
 });
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>;

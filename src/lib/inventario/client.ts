@@ -48,7 +48,7 @@ export function useSearchProducts(q: string) {
 
 /** SWR hook — catalog list for `/inventario`: full list on empty query, else search. */
 export function useProductSearch(query: string) {
-  const q = query.trim() === "" ? "*" : query.trim();
+  const q = query.trim();
   return useSWR(["search", q], () => searchProducts(q));
 }
 

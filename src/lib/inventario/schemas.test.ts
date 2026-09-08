@@ -223,12 +223,20 @@ describe("searchQuerySchema (SE-R1)", () => {
     }
   });
 
-  it("rejects a missing q", () => {
-    expect(searchQuerySchema.safeParse({ page: 1 }).success).toBe(false);
+  it("defaults a missing q to empty (catalog load, CRITICAL-1)", () => {
+    const parsed = searchQuerySchema.safeParse({ page: 1 });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.q).toBe("");
+    }
   });
 
-  it("rejects an empty q", () => {
-    expect(searchQuerySchema.safeParse({ q: "" }).success).toBe(false);
+  it("accepts an empty q as the full-catalog contract", () => {
+    const parsed = searchQuerySchema.safeParse({ q: "" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.q).toBe("");
+    }
   });
 
   it("rejects pageSize above the max bound", () => {
