@@ -96,7 +96,15 @@ describe("ProductTable", () => {
       total: 1,
     };
 
-    render(<ProductTable data={data} isAdmin loading={false} error={null} />);
+    render(
+      <ProductTable
+        data={data}
+        isAdmin
+        loading={false}
+        error={null}
+        renderSoftDelete={() => <button type="button">Desactivar</button>}
+      />,
+    );
 
     expect(screen.getByRole("button", { name: /editar/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /desactivar/i })).toBeInTheDocument();

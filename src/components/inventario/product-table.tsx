@@ -1,7 +1,8 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { Paginated, ProductSummary, VariantSummary } from "@/lib/inventario/queries";
-import { PencilSquareIcon, ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 
 /**
  * Client-side guard (task 2.1): `/api/inventario/search` includes every
@@ -18,6 +19,7 @@ interface ProductTableProps {
   loading: boolean;
   error: string | null;
   onEditProduct?: (product: ProductSummary) => void;
+  renderSoftDelete?: (product: ProductSummary) => ReactNode;
 }
 
 /**
@@ -25,7 +27,7 @@ interface ProductTableProps {
  * action buttons are hidden when `isAdmin` is false. Flat design per STYLES.md:
  * 2px radius, no shadows, solid palette (#1A1A1A/#4A4A4A/#0066FF/#FFFFFF).
  */
-export function ProductTable({ data, isAdmin, loading, error, onEditProduct }: ProductTableProps) {
+export function ProductTable({ data, isAdmin, loading, error, onEditProduct, renderSoftDelete }: ProductTableProps) {
   if (loading) {
     return (
       <div data-testid="product-table-loading" className="space-y-2" role="status" aria-label="Cargando productos">
@@ -110,14 +112,7 @@ export function ProductTable({ data, isAdmin, loading, error, onEditProduct }: P
                         <PencilSquareIcon aria-hidden="true" className="h-4 w-4" />
                         Editar
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onEditProduct?.(product)}
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-[2px] border border-[#C0392B]/40 px-2.5 py-1.5 text-xs font-medium text-[#C0392B] transition-colors hover:bg-[#C0392B]/5"
-                      >
-                        <ArchiveBoxXMarkIcon aria-hidden="true" className="h-4 w-4" />
-                        Desactivar
-                      </button>
+                      {renderSoftDelete ? renderSoftDelete(product) : null}
                     </div>
                   </td>
                 ) : null}

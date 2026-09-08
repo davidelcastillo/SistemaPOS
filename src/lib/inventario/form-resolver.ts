@@ -16,6 +16,9 @@ import type { z } from "zod";
  * output against RHF's `FieldValues` constraint.
  */
 export function zodResolver<T extends z.ZodTypeAny>(schema: T): Resolver {
+  // Boundary cast: zod's `output<T>` is `unknown`, which never satisfies RHF's
+  // `FieldValues` constraint. The adapter returns the base `Resolver` and each
+  // form casts it to its concrete `useForm<T>` type (see the forms).
   return (values: unknown) => {
     const parsed = schema.safeParse(values);
     if (parsed.success) {

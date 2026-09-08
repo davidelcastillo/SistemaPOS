@@ -6,25 +6,45 @@ import { PlusIcon, ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import { useProductSearch } from "@/lib/inventario/client";
 import { SearchBar } from "@/components/inventario/search-bar";
 import { ProductTable } from "@/components/inventario/product-table";
+import { CategoryForm } from "@/components/inventario/category-form";
+import { ProductForm } from "@/components/inventario/product-form";
+import { SoftDeleteControls } from "@/components/inventario/soft-delete-controls";
+import type { ProductSummary } from "@/lib/inventario/queries";
 
 interface InventoryListProps {
   isAdmin: boolean;
-  onNewCategory?: () => void;
-  onNewProduct?: () => void;
-  onEditProduct?: (product: unknown) => void;
 }
 
 /**
  * Client inventory workspace (SE-R2/R3, SD-R3): debounced search + SWR list
- * + role-gated action buttons. Admin-only mutations open via the form modals
- * wired by the parent page.
+ * + role-gated mutation buttons. Admin-only actions open the modals; the real
+ * gate lives server-side in every SA/RH.
  */
-export function InventoryList({ isAdmin, onNewCategory, onNewProduct, onEditProduct }: InventoryListProps) {
+export function InventoryList({ isAdmin }: InventoryListProps) {
   const [query, setQuery] = useState("");
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [productOpen, setProductOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductSummary | undefined>();
 
   // Empty query = full catalog: a broad term matches everything (SE-R1 OR
   // contains) while keeping the endpoint's non-empty `q` contract.
-  const { data, error, isLoading } = useProductSearch(query);
+  const { data, error, isLoading, mutate } = useProductSearch(query);
+
+  const productGroups =
+    editingProduct?.variants.map((v, i) => ({
+      attributeId: `variant-${i}`,
+      valueIds: [v.id],
+    })) ?? [];
+
+  function openNewProduct() {
+    setEditingProduct(undefined);
+    setProductOpen(true);
+  }
+
+  function openEditProduct(product: ProductSummary) {
+    setEditingProduct(product);
+    setProductOpen(true);
+  }
 
   return (
     <div className="space-y-6">
@@ -44,7 +64,7 @@ export function InventoryList({ isAdmin, onNewCategory, onNewProduct, onEditProd
             <>
               <button
                 type="button"
-                onClick={onNewCategory}
+                onClick={() => setCategoryOpen(true)}
                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-[2px] border border-[#0066FF]/40 px-3 py-2 text-sm font-medium text-[#0066FF] transition-colors hover:bg-[#0066FF]/5"
               >
                 <PlusIcon aria-hidden="true" className="h-4 w-4" />
@@ -52,7 +72,7 @@ export function InventoryList({ isAdmin, onNewCategory, onNewProduct, onEditProd
               </button>
               <button
                 type="button"
-                onClick={onNewProduct}
+                onClick={openNewProduct}
                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-[2px] bg-[#0066FF] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0052CC]"
               >
                 <PlusIcon aria-hidden="true" className="h-4 w-4" />
@@ -63,7 +83,33 @@ export function InventoryList({ isAdmin, onNewCategory, onNewProduct, onEditProd
         </div>
       </div>
 
-      <ProductTable data={data ?? null} isAdmin={isAdmin} loading={isLoading} error={error?.message ?? null} onEditProduct={onEditProduct} />
+      <ProductTable
+        data={data ?? null}
+        isAdmin={isAdmin}
+        loading={isLoading}
+        error={error?.message ?? null}
+        onEditProduct={openEditProduct}
+        renderSoftDelete={(product) => (
+          <SoftDeleteControls isAdmin productId={product.id} variantId={null} onDeleted={mutate} />
+        )}
+      />
+
+      <CategoryForm open={categoryOpen} onClose={() => setCategoryOpen(false)} />
+      <ProductForm
+        open={productOpen}
+        onClose={() => setProductOpen(false)}
+        product={editingProduct}
+        attributeGroups={productGroups}
+        skuTemplate={editingProduct?.name ?? ""}
+        variants={
+          editingProduct?.variants.map((v) => ({
+            attributeValueIds: [v.id],
+            salePrice: v.salePrice,
+            stock: v.stock,
+          })) ?? []
+        }
+        editVariants={editingProduct?.variants.map((v) => ({ id: v.id }))}
+      />
     </div>
   );
 }
