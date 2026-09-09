@@ -225,7 +225,6 @@ Una HU se considera completa SOLO cuando cumple todos los criterios:
 ## ✅ 6. Checklist rápido antes de iniciar una nueva tarea SDD
 
 - [ ]  Verificar que CodeGraph este activo
-- [ ]  Verificar que exista el grafo de Graphify en `.\graphify-out` si no existe, ejecutar el comando "/graphify ."
 - [ ] Verificar que `.env` tenga todas las variables requeridas (sección 2).
 - [ ] Verificar que el contenedor local de PostgreSQL esté levantado (`docker ps`).
 - [ ] Ejecutar `opencode skill run skill-registry`.
