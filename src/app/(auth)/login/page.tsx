@@ -16,8 +16,9 @@ import { loginSchema, type LoginInput } from "@/lib/validations/auth";
  * when present, otherwise to /dashboard (same session destination the root
  * page.tsx redirects to). The role-based destination matrix is HU-1.2.
  *
- * Flat design per .STYLES.md: 1px borders, 2px radius, accent focus ring,
- * no shadows.
+ * Design per STYLES.md: cream canvas #f5f1ec, white card with hairline
+ * border, charcoal #111111 as system primary (inputs focus ring + button),
+ * semantic-error #c41c1c, rounded-md 8px on controls, no shadows.
  */
 export default function LoginPage() {
   const router = useRouter();
@@ -56,16 +57,16 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center px-6">
+    <main className="flex flex-1 items-center justify-center bg-[#f5f1ec] px-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="w-full max-w-sm border border-neutral-300 bg-white p-8"
+        className="w-full max-w-sm rounded-[12px] border border-[#d3cec6] bg-white p-6 sm:p-8"
       >
-        <h1 className="text-4xl font-bold tracking-tight text-neutral-900">
+        <h1 className="text-[28px] font-medium leading-[1.2] tracking-[-0.5px] text-[#111111]">
           Iniciar sesión
         </h1>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm leading-[1.5] text-[#626260]">
           Ingresá con tu cuenta para operar el sistema.
         </p>
 
@@ -73,7 +74,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-neutral-700"
+              className="block text-sm font-medium text-[#111111]"
             >
               Email
             </label>
@@ -83,13 +84,13 @@ export default function LoginPage() {
               autoComplete="email"
               aria-invalid={errors.email ? true : undefined}
               aria-describedby={errors.email ? "email-error" : undefined}
-              className={`mt-1 w-full rounded-[2px] border bg-white px-3 py-2 text-base text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-[#0066FF] focus:ring-offset-2 ${
-                errors.email ? "border-red-500" : "border-neutral-300"
+              className={`mt-1 w-full rounded-[8px] border bg-white px-3.5 py-2.5 text-base text-[#111111] outline-none transition-colors focus:border-[#111111] focus:ring-1 focus:ring-[#111111] ${
+                errors.email ? "border-[#c41c1c]" : "border-[#d3cec6]"
               }`}
               {...register("email")}
             />
             {errors.email && (
-              <p id="email-error" className="mt-1 text-sm text-red-600">
+              <p id="email-error" className="mt-1 text-sm text-[#c41c1c]">
                 {errors.email.message}
               </p>
             )}
@@ -98,7 +99,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-neutral-700"
+              className="block text-sm font-medium text-[#111111]"
             >
               Contraseña
             </label>
@@ -110,13 +111,13 @@ export default function LoginPage() {
               aria-describedby={
                 errors.password ? "password-error" : undefined
               }
-              className={`mt-1 w-full rounded-[2px] border bg-white px-3 py-2 text-base text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-[#0066FF] focus:ring-offset-2 ${
-                errors.password ? "border-red-500" : "border-neutral-300"
+              className={`mt-1 w-full rounded-[8px] border bg-white px-3.5 py-2.5 text-base text-[#111111] outline-none transition-colors focus:border-[#111111] focus:ring-1 focus:ring-[#111111] ${
+                errors.password ? "border-[#c41c1c]" : "border-[#d3cec6]"
               }`}
               {...register("password")}
             />
             {errors.password && (
-              <p id="password-error" className="mt-1 text-sm text-red-600">
+              <p id="password-error" className="mt-1 text-sm text-[#c41c1c]">
                 {errors.password.message}
               </p>
             )}
@@ -124,7 +125,7 @@ export default function LoginPage() {
         </div>
 
         {authError && (
-          <p role="alert" className="mt-6 text-sm text-red-600">
+          <p role="alert" className="mt-6 text-sm text-[#c41c1c]">
             {authError}
           </p>
         )}
@@ -132,7 +133,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-8 w-full bg-[#0066FF] px-4 py-3 text-base font-semibold text-white transition-colors hover:bg-[#0052CC] active:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-8 w-full rounded-[8px] bg-[#111111] px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Ingresando…" : "Ingresar"}
         </button>

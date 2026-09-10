@@ -21,13 +21,14 @@ Este archivo es la configuración central que consulta el agente antes de ejecut
 | turborepo | Monorepo build system with intelligent task caching | `.agents/skills/turborepo/` |
 | webapp-testing | Native Python Playwright scripts for testing local web applications | `.agents/skills/webapp-testing/` |
 | context7-mcp | Current library/framework docs via Context7 | `~/.agents/skills/context7-mcp/` |
-| STYLES | Style guide for this project |.STYLES.md|
+| STYLES | Style guide for this project | .STYLES.md |
 
 Actualizar esta tabla cuando cambie el registro de skills. Antes de cada delegación, resolver los skills relevantes por nombre de registro:
 
 ```bash
 opencode skill run skill-registry
 ```
+
 Usar Lazy Loading para cargar los skills solo cuando se necesiten.
 
 ---
@@ -52,12 +53,13 @@ Asegúrate de que las siguientes variables estén definidas en `.env` antes de i
 Estándar de trabajo del proyecto (ver `docs/Desarrollo-Modular-IA.md`). Objetivo: calidad, evitar conflictos en repositorio compartido y arquitectura escalable, con el desarrollador como arquitecto activo.
 
 ### 3.0 Forma de trabajo OpenCode + ClaudeCode EXLUSIVO DE DAVID, RAMA NO USA ESTA METODOLOGIA
+
 #### Decisión
 
 El ciclo SDD se reparte entre dos runtimes según el costo de tokens:
 
 | Runtime | Modelos | Rol |
-|---|---|---|
+| --- | --- | --- |
 | **OpenCode** (opencode-go) | Modelos chinos (deepseek-v4-flash, qwen, etc.) | Todas las fases SDD excepto `propose` y `design` |
 | **Claude Code** (suscripción Claude) | Opus (fases pesadas) | Fases `propose` y `design` |
 
@@ -73,7 +75,7 @@ copian ni pegan artefactos entre herramientas.
 #### Mapa de fases
 
 | Fase | Runtime | Modelo |
-|---|---|---|
+| --- | --- | --- |
 | `sdd-init` | OpenCode | chino (deepseek-v4-flash) |
 | `sdd-explore` | OpenCode | chino (deepseek-v4-flash) |
 | `sdd-propose` | **Claude Code** | **Opus** |
@@ -103,7 +105,8 @@ declarado por el workspace y ejecuta la fase nativamente.
 
 ##### Plantilla de handoff
 
-```
+```markdown
+
 ## Handoff SDD — fase {propose|design}
 Cambio: {change-name}
 Runtime destino: Claude Code (modelo Opus)
@@ -275,7 +278,8 @@ src/lib/<modulo>/schemas.ts     → contrato de datos (Zod) del módulo
 
 ---
 
-#Contex-Mode 
+# Contex-Mode
+
 Verificar instalacion con `ctx stats`
 
 |Slash Command	|What it does|
@@ -371,3 +375,13 @@ If search returns 0 results, proceed as a fresh session.
 | `ctx purge` | Call `purge` MCP tool with confirm: true. Warns before wiping knowledge base. |
 
 After /clear or /compact: knowledge base and session stats preserved. Use `ctx purge` to start fresh.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
