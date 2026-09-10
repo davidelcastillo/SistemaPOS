@@ -14,6 +14,7 @@ export type ErrorCode =
   | "STOCK_INSUFFICIENT"
   | "DUPLICATE_CATEGORY"
   | "DUPLICATE_SKU"
+  | "DUPLICATE_EMAIL"
   | "NOT_FOUND";
 
 export type ActionResult<T> =
@@ -28,6 +29,7 @@ const ERROR_CODES: readonly ErrorCode[] = [
   "STOCK_INSUFFICIENT",
   "DUPLICATE_CATEGORY",
   "DUPLICATE_SKU",
+  "DUPLICATE_EMAIL",
   "NOT_FOUND",
 ];
 

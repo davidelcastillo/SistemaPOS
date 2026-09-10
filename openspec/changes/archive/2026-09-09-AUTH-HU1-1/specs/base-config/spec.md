@@ -21,13 +21,13 @@ El `.env` MUST definir `NEXTAUTH_URL` (URL canónica, `http://localhost:3000` en
 
 ### Requirement: R-7 — Proxy renombrado desde middleware (Next 16)
 
-El archivo `src/middleware.ts` MUST renombrarse a `src/proxy.ts` (codemod oficial `middleware-to-proxy`), con la función `middleware()` → `proxy()` y `config` → `proxyConfig`. Proxy MUST ejecutar en runtime Node.js (sin workarounds edge) y usar la misma API `NextRequest`/`NextResponse`.
+El archivo `src/middleware.ts` MUST renombrarse a `src/proxy.ts` (codemod oficial `middleware-to-proxy`), con la función `middleware()` → `proxy()` y el `export const config` conservado (el codemod NO lo renombra a `proxyConfig` — ver design §1). Proxy MUST ejecutar en runtime Node.js (sin workarounds edge) y usar la misma API `NextRequest`/`NextResponse`.
 
 #### Scenario: Rename sin regresión
 
 - GIVEN el shell de middleware existente (Fase 0)
 - WHEN se ejecuta el codemod `middleware-to-proxy`
-- THEN existe `src/proxy.ts` con `proxy()` y `proxyConfig`
+- THEN existe `src/proxy.ts` con `proxy()` y `export const config`
 - AND desaparece `src/middleware.ts`
 
 #### Scenario: Runtime Node habilitado

@@ -120,6 +120,7 @@ describe("ActionResult<T> (data contract: result)", () => {
       "STOCK_INSUFFICIENT",
       "DUPLICATE_CATEGORY",
       "DUPLICATE_SKU",
+      "DUPLICATE_EMAIL",
       "NOT_FOUND",
     ] as const;
     for (const code of codes) {
