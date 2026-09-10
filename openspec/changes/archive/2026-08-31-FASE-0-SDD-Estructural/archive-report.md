@@ -68,14 +68,14 @@ Las 5 specs delta (New, greenfield) son specs completas y se promovieron a `open
 
 ## 5. Observaciones Engram leídas (traceability)
 
-- #258 pre-flight SDD Fase 0 + chain_strategy feature-branch-chain
-- #254 `sdd/FASE-0-SDD-Estructural/proposal`
-- #257 `sdd/FASE-0-SDD-Estructural/tasks`
-- #255 `sdd/FASE-0-SDD-Estructural/spec`
-- #256 `sdd/FASE-0-SDD-Estructural/design`
-- #259 `sdd/FASE-0-SDD-Estructural/apply-progress`
-- #260 `sdd/FASE-0-SDD-Estructural/verify-report`
-- #253 `sdd/FASE-0-SDD-Estructural/explore`
+- \#258 pre-flight SDD Fase 0 + chain_strategy feature-branch-chain
+- \#254 `sdd/FASE-0-SDD-Estructural/proposal`
+- \#257 `sdd/FASE-0-SDD-Estructural/tasks`
+- \#255 `sdd/FASE-0-SDD-Estructural/spec`
+- \#256 `sdd/FASE-0-SDD-Estructural/design`
+- \#259 `sdd/FASE-0-SDD-Estructural/apply-progress`
+- \#260 `sdd/FASE-0-SDD-Estructural/verify-report`
+- \#253 `sdd/FASE-0-SDD-Estructural/explore`
 
 Artifact Engram persistiendo en archive: `sdd/FASE-0-SDD-Estructural/archive-report`.
 
