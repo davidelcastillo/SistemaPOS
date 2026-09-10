@@ -9,7 +9,7 @@
 
 | Módulo | Operación | Exposición | Ubicación | Prueba |
 |---|---|---|---|---|
-| 1 Auth | login/logout/sesión | NextAuth `/api/auth/*` + middleware | `src/app/api/auth/[...nextauth]/route.ts`, `src/lib/auth.ts`, `src/middleware.ts` | E2E + Vitest integración |
+| 1 Auth | login/logout/sesión | NextAuth `/api/auth/*` + proxy | `src/app/api/auth/[...nextauth]/route.ts`, `src/lib/auth.ts`, `src/proxy.ts` | E2E + Vitest integración |
 | 1 Auth | registro | SA `registerUser` | `src/actions/auth.ts` | Vitest integración PostgreSQL |
 | 2 Inventario | CRUD categorías/productos/variantes, soft-delete, reactivar | Server Actions (`$transaction`) | `src/actions/inventario.ts` | Vitest integración PostgreSQL |
 | 2 Inventario | búsqueda debounce (SWR) | GET `/api/inventario/search?q=` | `src/app/api/inventario/search/route.ts` | API tests |
@@ -30,7 +30,7 @@
 
 - **Cashier en `/compras` solo lectura** (decisión resuelta): los GET de compras
   están abiertos a cashier; `createPurchase` valida rol `admin` **server-side**.
-- Matriz de roles del middleware (HU-1.2): público `/login` + `/api/auth`;
+- Matriz de roles del proxy (HU-1.2): público `/login` + `/api/auth`;
   cashier `/ventas`, `/inventario`, `/compras` (GET); admin todo +
   `/inactivos`, `/descuentos`, `/dashboard` (solo admin).
 - La validación de rol se hace SIEMPRE en el servidor (Server Action), nunca solo
@@ -48,13 +48,13 @@ producto: Product+Variants+atributos).
 
 FASE 0 configura el umbral de **80%** (`@vitest/coverage-v8`) como gate del DoD
 en `vitest.config.mts`. Con Vitest v4, el reporte mide **solo los archivos
-importados por tests** (los shells sin tests — `lib/auth.ts`, `middleware.ts`,
+importados por tests** (los shells sin tests — `lib/auth.ts`, `proxy.ts`,
 páginas — no arrastran el porcentaje hasta que su módulo agregue pruebas).
 
 Plan por módulo (desde Auth):
 
 1. **Auth (HU-1.1/1.2)**: tests de integración de `registerUser`/`login` contra
-   PostgreSQL + API tests → cubre `lib/auth.ts` + `middleware.ts` + acciones.
+   PostgreSQL + API tests → cubre `lib/auth.ts` + `proxy.ts` + acciones.
 2. **Inventario (HU-2.x)**: integración de CRUD + API tests de search/inactive →
    cubre `actions/inventario.ts` y `lib/inventario/`.
 3. **Ventas (HU-3.x)**: integración de caja/venta + API tests → cubre
