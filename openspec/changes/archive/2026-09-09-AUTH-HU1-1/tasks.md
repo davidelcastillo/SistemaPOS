@@ -109,11 +109,11 @@ Chain strategy: feature-branch-chain
 
 ## Fase 9: Correcciones verify (W1/W2)
 
-- [ ] F7 W1: `openspec/changes/AUTH-HU1-1/specs/base-config/spec.md` R-7: `proxyConfig` → `export const config` (2 menciones); NO tocar `src/proxy.ts`
-- [ ] F8 W2: `docs/mapa-exposicion.md`: `src/middleware.ts` → `src/proxy.ts` (líneas 12, 33-35, 52, 57)
-- [ ] F9 Opcional: `docs/auth.md`: sección flujo frontend (UI login, SessionProvider, E2E) si aporta
+- [x] F7 W1: `openspec/changes/AUTH-HU1-1/specs/base-config/spec.md` R-7: `proxyConfig` → `export const config` (2 menciones); NO tocar `src/proxy.ts`
+- [x] F8 W2: `docs/mapa-exposicion.md`: `src/middleware.ts` → `src/proxy.ts` (líneas 12, 33-35, 52, 57)
+- [x] F9 Opcional: `docs/auth.md`: sección flujo frontend (UI login, SessionProvider, E2E) si aporta
 
 ## Fase 10: Verificación y cierre frontend
 
-- [ ] F10 `npx playwright test e2e/auth.spec.ts` verde (login ok admin/cashier + fallo + redirect)
-- [ ] F11 Avisar compañero de hot files en tracker #6; work-unit commits por unidad (PR #11, PR #12)
+- [x] F10 `npx playwright test e2e/auth.spec.ts` verde (login ok admin/cashier + fallo + redirect)
+- [x] F11 Avisar compañero de hot files en tracker #6; work-unit commits por unidad (PR #11, PR #12)

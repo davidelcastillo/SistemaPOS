@@ -11,6 +11,17 @@ import { expect, test } from "@playwright/test";
  * authenticated visitor on /dashboard.
  */
 test.describe("root redirect", () => {
+  // Slow network-drive first compile: warm-up hooks can exceed the 30s
+  // default; allow up to 2 minutes.
+  test.describe.configure({ timeout: 120_000 });
+
+  test.beforeAll(async () => {
+    // Warm up the NextAuth route handler (Turbopack lazy-compiles API routes;
+    // on this slow drive the first hit can exceed the default expect timeout).
+    await fetch("http://localhost:3000/api/auth/session");
+    await fetch("http://localhost:3000/api/auth/providers");
+  });
+
   test("redirects unauthenticated visitors to /login", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/login$/);
