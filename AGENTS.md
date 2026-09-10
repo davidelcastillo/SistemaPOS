@@ -21,13 +21,15 @@ Este archivo es la configuración central que consulta el agente antes de ejecut
 | turborepo | Monorepo build system with intelligent task caching | `.agents/skills/turborepo/` |
 | webapp-testing | Native Python Playwright scripts for testing local web applications | `.agents/skills/webapp-testing/` |
 | context7-mcp | Current library/framework docs via Context7 | `~/.agents/skills/context7-mcp/` |
-| STYLES | Style guide for this project |.STYLES.md|
+| STYLES | Style guide for this project | .STYLES.md |
 
 Actualizar esta tabla cuando cambie el registro de skills. Antes de cada delegación, resolver los skills relevantes por nombre de registro:
 
 ```bash
 opencode skill run skill-registry
 ```
+
+Usar Lazy Loading para cargar los skills solo cuando se necesiten.
 
 ---
 
@@ -49,6 +51,112 @@ Asegúrate de que las siguientes variables estén definidas en `.env` antes de i
 ## 📐 3. Metodología de desarrollo modular asistida por IA
 
 Estándar de trabajo del proyecto (ver `docs/Desarrollo-Modular-IA.md`). Objetivo: calidad, evitar conflictos en repositorio compartido y arquitectura escalable, con el desarrollador como arquitecto activo.
+
+### 3.0 Forma de trabajo OpenCode + ClaudeCode EXLUSIVO DE DAVID, RAMA NO USA ESTA METODOLOGIA
+
+#### Decisión
+
+El ciclo SDD se reparte entre dos runtimes según el costo de tokens:
+
+| Runtime | Modelos | Rol |
+| --- | --- | --- |
+| **OpenCode** (opencode-go) | Modelos chinos (deepseek-v4-flash, qwen, etc.) | Todas las fases SDD excepto `propose` y `design` |
+| **Claude Code** (suscripción Claude) | Opus (fases pesadas) | Fases `propose` y `design` |
+
+**Motivo**: usar Opus vía API dentro de OpenCode consume muchos más tokens que
+usar Opus directo desde Claude Code (costo plano de suscripción). Las fases de
+razonamiento más demandante (proposal y design) se ejecutan donde el modelo
+caro cuesta menos.
+
+**Store**: `hybrid` (openspec + engram). Ambos runtimes trabajan sobre el mismo
+repo y la misma base de engram, por lo que el handoff es **nativo**: no se
+copian ni pegan artefactos entre herramientas.
+
+#### Mapa de fases
+
+| Fase | Runtime | Modelo |
+| --- | --- | --- |
+| `sdd-init` | OpenCode | chino (deepseek-v4-flash) |
+| `sdd-explore` | OpenCode | chino (deepseek-v4-flash) |
+| `sdd-propose` | **Claude Code** | **Opus** |
+| `sdd-spec` | OpenCode | chino |
+| `sdd-design` | **Claude Code** | **Opus** |
+| `sdd-tasks` | OpenCode | chino |
+| `sdd-apply` | OpenCode | chino |
+| `sdd-verify` | OpenCode | chino |
+| `sdd-archive` | OpenCode | chino (flash) |
+
+#### Regla del orquestador (OpenCode)
+
+Cuando el dispatcher nativo (`gentle-ai sdd-status` / `sdd-continue`) reporte
+`nextRecommended: propose` o `nextRecommended: design`, el orquestador:
+
+1. **NO** lanza `sdd-propose` / `sdd-design` en OpenCode, sin importar el modo
+   (interactivo o automático). Son puntos de handoff obligatorios.
+2. Persiste el estado del cambio en engram (topic `sdd/<change>/handoff`).
+3. Emite el prompt de handoff (plantilla abajo) para Claude Code.
+4. Se detiene y espera a que el usuario vuelva.
+
+#### Handoff: OpenCode → Claude Code
+
+El usuario abre Claude Code en el **mismo repo**, pega el prompt de handoff y
+elige Opus como modelo. Claude Code (con gentle-ai instalado) resuelve el store
+declarado por el workspace y ejecuta la fase nativamente.
+
+##### Plantilla de handoff
+
+```markdown
+
+## Handoff SDD — fase {propose|design}
+Cambio: {change-name}
+Runtime destino: Claude Code (modelo Opus)
+Repo: {ruta-al-repo}
+Store: hybrid (openspec + engram)
+
+Instrucciones:
+1. Abrí Claude Code en {ruta-al-repo}.
+2. Verificá el estado con:
+   gentle-ai sdd-status {change-name} --cwd {ruta-al-repo} --json --instructions
+3. Si nextRecommended es {propose|design}, ejecutá:
+   gentle-ai sdd-continue {change-name} --cwd {ruta-al-repo}
+   y ejecutá la fase {propose|design} con Opus.
+4. La fase debe escribir los artefactos en:
+   - openspec/changes/{change-name}/ ({propose.md|design.md})
+   - engram topic sdd/{change-name}/{propose|design}
+5. Confirmá que el artefacto existe y avisame "listo".
+6. Volvé a OpenCode y decime "continuá".
+```
+
+#### Retorno: Claude Code → OpenCode
+
+Al volver a OpenCode:
+
+1. **Gatekeeper**: el orquestador verifica que el artefacto existe y es legible
+   (`openspec/changes/<change>/propose.md` o `design.md`, y el topic engram
+   correspondiente). Si no existe → avisar, no continuar.
+2. **Resume nativo**: se consulta `gentle-ai sdd-status <change>` de nuevo. El
+   dispatcher ahora reporta la siguiente fase (`spec` tras propose, `tasks`
+   tras design) y el flujo continúa en OpenCode con modelos chinos.
+
+#### Checklist de configuración
+
+- [ ] gentle-ai instalado y funcional en Claude Code (plugin + CLI).
+- [ ] engram disponible como MCP en Claude Code.
+- [ ] El mismo repo se abre en ambos runtimes (mismo `--cwd`).
+- [ ] Al abrir Claude Code, elegir Opus para las fases `propose`/`design`.
+- [ ] En OpenCode, los agentes `sdd-propose` / `sdd-design` quedan como
+      "handoff-only": el orquestador no los lanza (regla del orquestador).
+
+#### Ventajas
+
+- **Token economics**: Opus se paga plano (suscripción) en lugar de por token
+  vía API en OpenCode.
+- **Contexto completo**: Claude Code lee el mismo repo, el mismo openspec y el
+  mismo engram; no hay pérdida de contexto en el traspaso.
+- **Artefactos canónicos**: propose/design siempre terminan en el store hybrid,
+  sin archivos intermedios ni copiar/pegar.
+- **Continuidad**: engram conserva el estado del cambio para cualquier sesión
+  futura, en cualquier runtime.
 
 ### 3.1 Fase 0 – Arquitectura global (solo proyectos nuevos)
 
@@ -95,6 +203,9 @@ Una HU se considera completa SOLO cuando cumple todos los criterios:
 8. **Testing:** unit tests (`npm test` = `vitest run`), integración (Prisma + PostgreSQL en Docker), E2E (`npm run test:e2e` = `playwright test`). Ejecutar `npm test` antes de cada `sdd-apply` y E2E antes de `sdd-verify` si existen tests E2E.
 9. **Documentación:** cada feature con su archivo en `docs/` siguiendo la plantilla de `cognitive-doc-design`; actualizar `README.md` con resumen y enlaces.
 10. **Versionado y releases:** Conventional Commits (`feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `chore`). En `main`, validar receipt de revisión y que no haya cambios pendientes. Si el release es major o sigue a un incidente de seguridad, requiere revisión extraordinaria (Judgment Day o 4R) antes de publicar.
+11. **NO REESCRIBIR ARCHIVOS ENTEROS** Si se debe modificar solo una linea del archivo cambiar eso, evitar siempre escribir archivos enteros desde cero a menos que el archivo entero este mal o sea un arhivo nuevo, caso contrario preguntar siempre.
+12. **USAR LAZY LOADING PARA LAS SKILL** Cada vez que lanzas un subagente, enviarle SOLO LAS SKILLS NECESARIAS, no sobrecargar su ventana de contexto con skills que no le seran de utilidad.
+13. **Respuestas en el Chat** Siempre usar respuestas cortas, tratar de no hcaer cuadro de resumenes ni nada, dame la respueta final y ya, ahorremos todo lo que se pueda en escritura basura.
 
 ---
 
@@ -116,6 +227,7 @@ Una HU se considera completa SOLO cuando cumple todos los criterios:
 
 ## ✅ 6. Checklist rápido antes de iniciar una nueva tarea SDD
 
+- [ ]  Verificar que CodeGraph este activo
 - [ ] Verificar que `.env` tenga todas las variables requeridas (sección 2).
 - [ ] Verificar que el contenedor local de PostgreSQL esté levantado (`docker ps`).
 - [ ] Ejecutar `opencode skill run skill-registry`.
@@ -166,6 +278,103 @@ src/lib/<modulo>/schemas.ts     → contrato de datos (Zod) del módulo
 
 ---
 
+# Contex-Mode
+
+Verificar instalacion con `ctx stats`
+
+|Slash Command	|What it does|
+|/context-mode:ctx-stats	|Context savings — per-tool breakdown, tokens consumed, savings ratio.|
+|/context-mode:ctx-doctor	|Diagnostics — runtimes, hooks, FTS5, plugin registration, versions.|
+|/context-mode:ctx-index	|Index a local file or directory into the persistent FTS5 knowledge base.|
+|/context-mode:ctx-search	|Search previously indexed content.|
+|/context-mode:ctx-upgrade	|Pull latest, rebuild, migrate cache, fix hooks.|
+|/context-mode:ctx-purge	|Permanently delete all indexed content from the knowledge base.|
+|/context-mode:ctx-insight|	Opens the hosted Insight dashboard (context-mode.com/insight) in your browser — org analytics for AI-assisted engineering teams.|
+
+# context-mode — MANDATORY routing rules
+
+context-mode MCP tools available. Rules protect context window from flooding. One unrouted command dumps 56 KB into context.
+
+## Think in Code — MANDATORY
+
+Analyze/count/filter/compare/search/parse/transform data: **write code** via `context-mode_ctx_execute(language, code)`, `console.log()` only the answer. Do NOT read raw data into context. PROGRAM the analysis, not COMPUTE it. Pure JavaScript — Node.js built-ins only (`fs`, `path`, `child_process`). `try/catch`, handle `null`/`undefined`. One script replaces ten tool calls.
+
+## BLOCKED — do NOT attempt
+
+### curl / wget — BLOCKED
+Shell `curl`/`wget` intercepted and blocked. Do NOT retry.
+Use: `context-mode_ctx_fetch_and_index(url, source)` or `context-mode_ctx_execute(language: "javascript", code: "const r = await fetch(...)")`
+
+### Inline HTTP — BLOCKED
+`fetch('http`, `requests.get(`, `requests.post(`, `http.get(`, `http.request(` — intercepted. Do NOT retry.
+Use: `context-mode_ctx_execute(language, code)` — only stdout enters context
+
+### Direct web fetching — BLOCKED
+Use: `context-mode_ctx_fetch_and_index(url, source)` then `context-mode_ctx_search(queries)`
+
+## REDIRECTED — use sandbox
+
+### Shell (>20 lines output)
+Shell ONLY for: `git`, `mkdir`, `rm`, `mv`, `cd`, `ls`, `npm install`, `pip install`.
+Otherwise: `context-mode_ctx_batch_execute(commands, queries)` or `context-mode_ctx_execute(language: "javascript", code: "...")`. Use `language: "shell"` only when code matches the host shell.
+
+### File reading (for analysis)
+Reading to **edit** → reading correct. Reading to **analyze/explore/summarize** → `context-mode_ctx_execute_file(path, language, code)`.
+
+### grep / search (large results)
+Use `context-mode_ctx_execute(language: "javascript", code: "...")` in sandbox for portable filtering/counting.
+
+## Tool selection
+
+0. **MEMORY**: `context-mode_ctx_search(sort: "timeline")` — after resume, check prior context before asking user.
+1. **GATHER**: `context-mode_ctx_batch_execute(commands, queries)` — runs all commands, auto-indexes, returns search. ONE call replaces 30+. Each command: `{label: "header", command: "..."}`.
+2. **FOLLOW-UP**: `context-mode_ctx_search(queries: ["q1", "q2", ...])` — all questions as array, ONE call (default relevance mode).
+3. **PROCESSING**: `context-mode_ctx_execute(language, code)` | `context-mode_ctx_execute_file(path, language, code)` — sandbox, only stdout enters context.
+4. **WEB**: `context-mode_ctx_fetch_and_index(url, source)` then `context-mode_ctx_search(queries)` — raw HTML never enters context.
+5. **INDEX**: `context-mode_ctx_index(content, source)` — store in FTS5 for later search.
+
+## Parallel I/O batches
+
+For multi-URL fetches or multi-API calls, **always** include `concurrency: N` (1-8):
+
+- `context-mode_ctx_batch_execute(commands: [3+ network commands], concurrency: 5)` — gh, curl, dig, docker inspect, multi-region cloud queries
+- `context-mode_ctx_fetch_and_index(requests: [{url, source}, ...], concurrency: 5)` — multi-URL batch fetch
+
+**Use concurrency 4-8** for I/O-bound work (network calls, API queries). **Keep concurrency 1** for CPU-bound (npm test, build, lint) or commands sharing state (ports, lock files, same-repo writes).
+
+GitHub API rate-limit: cap at 4 for `gh` calls.
+
+## Output
+
+Write artifacts to FILES — never inline. Return: file path + 1-line description.
+Descriptive source labels for `search(source: "label")`.
+
+## Session Continuity
+
+Skills, roles, and decisions persist for the entire session. Do not abandon them as the conversation grows.
+
+## Memory
+
+Session history is persistent and searchable. On resume, search BEFORE asking the user:
+
+| Need | Command |
+|------|---------|
+| What did we decide? | `context-mode_ctx_search(queries: ["decision"], source: "decision", sort: "timeline")` |
+| What constraints exist? | `context-mode_ctx_search(queries: ["constraint"], source: "constraint")` |
+
+DO NOT ask "what were we working on?" — SEARCH FIRST.
+If search returns 0 results, proceed as a fresh session.
+
+## ctx commands
+
+| Command | Action |
+|---------|--------|
+| `ctx stats` | Call `stats` MCP tool, display full output verbatim |
+| `ctx doctor` | Call `doctor` MCP tool, run returned shell command, display as checklist |
+| `ctx upgrade` | Call `upgrade` MCP tool, run returned shell command, display as checklist |
+| `ctx purge` | Call `purge` MCP tool with confirm: true. Warns before wiping knowledge base. |
+
+After /clear or /compact: knowledge base and session stats preserved. Use `ctx purge` to start fresh.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -24,7 +24,8 @@ Las mutaciones MUST exponerse como Server Actions (sin URL ni JSON, validación 
 
 ### Requirement: R-2 — Mapa por módulo
 
-Cada módulo MUST exponer según el mapa del proposal: Auth (SA registro + NextAuth login/logout + middleware); Inventario (SA CRUD/soft-delete + GET búsqueda); Ventas/Caja (SA caja + venta + GET búsqueda/historial); Compras (SA crear compra + GET modal/historial); Descuentos (SA CRUD + switch + motor puro); Dashboard (SA anulación + GET KPIs/ticket).
+Cada módulo MUST exponer según el mapa del proposal: Auth (SA `registerUser` solo admin + NextAuth login/logout vía route handler `/api/auth/*` + request interception en `proxy.ts`); Inventario (SA CRUD/soft-delete + GET búsqueda); Ventas/Caja (SA caja + venta + GET búsqueda/historial); Compras (SA crear compra + GET modal/historial); Descuentos (SA CRUD + switch + motor puro); Dashboard (SA anulación + GET KPIs/ticket).
+(Previously: Auth usaba `middleware.ts`; ahora el request interception vive en `proxy.ts` — Next 16)
 
 #### Scenario: Dashboard
 
@@ -33,6 +34,19 @@ Cada módulo MUST exponer según el mapa del proposal: Auth (SA registro + NextA
 - THEN se exponen por Route Handler GET
 - AND la anulación de venta es un Server Action
 
+#### Scenario: Login/logout de Auth
+
+- GIVEN el módulo auth
+- WHEN un cliente inicia o cierra sesión
+- THEN la operación se expone por el route handler `/api/auth/*`
+- AND la protección de rutas se evalúa en `proxy.ts`
+
+#### Scenario: Registro de Auth
+
+- GIVEN el módulo auth
+- WHEN un admin crea un usuario
+- THEN la operación es la Server Action `registerUser`
+- AND se valida rol admin server-side antes de insertar
 ### Requirement: R-3 — Cashier en /compras solo lectura
 
 El rol `cashier` MUST tener acceso de solo lectura a `/compras`; la creación de compras MUST requerir rol `admin` con validación server-side.

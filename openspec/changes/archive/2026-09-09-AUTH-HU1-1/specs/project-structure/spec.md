@@ -18,7 +18,7 @@ El código compartido MUST vivir en `src/lib/` común y `src/lib/validations/`; 
 - GIVEN `src/proxy.ts` como archivo caliente
 - WHEN un módulo necesita ajustar el request interception
 - THEN el cambio requiere acuerdo del equipo
-- AND `proxyConfig` mantiene la matriz de rutas vigente
+- AND `export const config` mantiene la matriz de rutas vigente
 
 #### Scenario: Auth como módulo con lógica propia
 
